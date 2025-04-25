@@ -31,6 +31,7 @@ import { Template } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { MessageOptimizer } from "@/components/message-optimizer";
 
 const formSchema = z.object({
   name: z.string().min(1, "Template name is required"),
@@ -221,13 +222,19 @@ export function TemplateEditor({ template, onSuccess }: TemplateEditorProps) {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <FormLabel>Template Content</FormLabel>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setPreviewMode(!previewMode)}
-                >
-                  {previewMode ? "Edit Mode" : "Preview Mode"}
-                </Button>
+                <div className="flex space-x-2">
+                  <MessageOptimizer 
+                    initialMessage={content} 
+                    onOptimized={(optimizedText) => form.setValue("content", optimizedText)}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setPreviewMode(!previewMode)}
+                  >
+                    {previewMode ? "Edit Mode" : "Preview Mode"}
+                  </Button>
+                </div>
               </div>
               
               {previewMode ? (

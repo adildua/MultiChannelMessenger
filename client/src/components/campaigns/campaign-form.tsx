@@ -34,6 +34,7 @@ import { Campaign, Channel, ContactList, Template, Flow } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { MessageOptimizer } from "@/components/message-optimizer";
 
 const formSchema = z.object({
   name: z.string().min(1, "Campaign name is required"),
@@ -176,7 +177,13 @@ export function CampaignForm({ campaign, onSuccess }: CampaignFormProps) {
             name="description"
             render={({ field }) => (
               <FormItem className="md:col-span-2">
-                <FormLabel>Description</FormLabel>
+                <div className="flex justify-between items-center">
+                  <FormLabel>Description</FormLabel>
+                  <MessageOptimizer 
+                    initialMessage={field.value || ''} 
+                    onOptimized={(optimizedText) => field.onChange(optimizedText)}
+                  />
+                </div>
                 <FormControl>
                   <Textarea 
                     placeholder="Campaign description..." 
