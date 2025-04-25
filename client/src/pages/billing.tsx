@@ -43,7 +43,7 @@ export default function Billing() {
   const [showTopupDialog, setShowTopupDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("transactions");
 
-  const { data: transactions, isLoading: isLoadingTransactions } = useQuery<Transaction[]>({
+  const { data: transactions, isLoading: isLoadingTransactions } = useQuery<any[]>({
     queryKey: ['/api/transactions'],
   });
 
