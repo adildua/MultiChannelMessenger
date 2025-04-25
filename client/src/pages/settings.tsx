@@ -216,380 +216,364 @@ export default function Settings() {
         <div className="py-4">
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle>Account Settings</CardTitle>
-                  <CardDescription>
-                    Manage your account preferences and settings
-                  </CardDescription>
-                </div>
-                <Tabs
-                  defaultValue="profile"
-                  value={activeTab}
-                  onValueChange={setActiveTab}
-                  className="w-[400px]"
-                >
-                  <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="profile">Profile</TabsTrigger>
-                    <TabsTrigger value="notifications">Notifications</TabsTrigger>
-                    <TabsTrigger value="appearance">Appearance</TabsTrigger>
-                    <TabsTrigger value="security">Security</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
+              <CardTitle>Account Settings</CardTitle>
+              <CardDescription>
+                Manage your account preferences and settings
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <TabsContent value="profile" className="mt-0">
-                <Form {...profileForm}>
-                  <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
-                    <div className="space-y-4">
-                      <FormField
-                        control={profileForm.control}
-                        name="name"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Full Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Your name" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={profileForm.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email Address</FormLabel>
-                            <FormControl>
-                              <Input placeholder="your.email@example.com" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={profileForm.control}
-                        name="username"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Username</FormLabel>
-                            <FormControl>
-                              <Input placeholder="username" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <Button type="submit">Save Profile</Button>
-                  </form>
-                </Form>
-              </TabsContent>
-              <TabsContent value="notifications" className="mt-0">
-                <Form {...notificationForm}>
-                  <form onSubmit={notificationForm.handleSubmit(onNotificationSubmit)} className="space-y-6">
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-medium">Notification Channels</h3>
-                      <FormField
-                        control={notificationForm.control}
-                        name="emailNotifications"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-base">Email Notifications</FormLabel>
-                              <FormDescription>
-                                Receive notifications via email
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={notificationForm.control}
-                        name="smsNotifications"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-base">SMS Notifications</FormLabel>
-                              <FormDescription>
-                                Receive notifications via SMS
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={notificationForm.control}
-                        name="pushNotifications"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-base">Push Notifications</FormLabel>
-                              <FormDescription>
-                                Receive push notifications in browser
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <Separator className="my-4" />
-                      
-                      <h3 className="text-lg font-medium">Notification Types</h3>
-                      <FormField
-                        control={notificationForm.control}
-                        name="campaignAlerts"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-base">Campaign Alerts</FormLabel>
-                              <FormDescription>
-                                Alerts about your campaign performance
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={notificationForm.control}
-                        name="balanceAlerts"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-base">Balance Alerts</FormLabel>
-                              <FormDescription>
-                                Alerts about your account balance
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={notificationForm.control}
-                        name="weeklyReports"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-base">Weekly Reports</FormLabel>
-                              <FormDescription>
-                                Receive weekly performance reports
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <Button type="submit">Save Notification Settings</Button>
-                  </form>
-                </Form>
-              </TabsContent>
-              <TabsContent value="appearance" className="mt-0">
-                <Form {...appearanceForm}>
-                  <form onSubmit={appearanceForm.handleSubmit(onAppearanceSubmit)} className="space-y-6">
-                    <div className="space-y-4">
-                      <FormField
-                        control={appearanceForm.control}
-                        name="theme"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Theme</FormLabel>
-                            <FormControl>
-                              <ToggleGroup
-                                type="single"
-                                value={field.value}
-                                onValueChange={(value) => {
-                                  if (value) field.onChange(value);
-                                }}
-                                className="justify-start"
-                              >
-                                <ToggleGroupItem value="light">Light</ToggleGroupItem>
-                                <ToggleGroupItem value="dark">Dark</ToggleGroupItem>
-                                <ToggleGroupItem value="system">System</ToggleGroupItem>
-                              </ToggleGroup>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={appearanceForm.control}
-                        name="language"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Language</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Tabs
+                defaultValue="profile"
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="profile">Profile</TabsTrigger>
+                  <TabsTrigger value="notifications">Notifications</TabsTrigger>
+                  <TabsTrigger value="appearance">Appearance</TabsTrigger>
+                  <TabsTrigger value="security">Security</TabsTrigger>
+                </TabsList>
+                <TabsContent value="profile" className="mt-6">
+                  <Form {...profileForm}>
+                    <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-6">
+                      <div className="space-y-4">
+                        <FormField
+                          control={profileForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Full Name</FormLabel>
                               <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a language" />
-                                </SelectTrigger>
+                                <Input placeholder="Your name" {...field} />
                               </FormControl>
-                              <SelectContent>
-                                <SelectItem value="en">English</SelectItem>
-                                <SelectItem value="es">Spanish</SelectItem>
-                                <SelectItem value="fr">French</SelectItem>
-                                <SelectItem value="de">German</SelectItem>
-                                <SelectItem value="zh">Chinese</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={appearanceForm.control}
-                        name="timezone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Timezone</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={profileForm.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email Address</FormLabel>
                               <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a timezone" />
-                                </SelectTrigger>
+                                <Input placeholder="your.email@example.com" {...field} />
                               </FormControl>
-                              <SelectContent>
-                                <SelectItem value="UTC">UTC</SelectItem>
-                                <SelectItem value="America/New_York">Eastern Time (ET)</SelectItem>
-                                <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
-                                <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
-                                <SelectItem value="America/Los_Angeles">Pacific Time (PT)</SelectItem>
-                                <SelectItem value="Europe/London">London (GMT)</SelectItem>
-                                <SelectItem value="Europe/Paris">Paris (CET)</SelectItem>
-                                <SelectItem value="Asia/Tokyo">Tokyo (JST)</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <Button type="submit">Save Appearance Settings</Button>
-                  </form>
-                </Form>
-              </TabsContent>
-              <TabsContent value="security" className="mt-0">
-                <Form {...securityForm}>
-                  <form onSubmit={securityForm.handleSubmit(onSecuritySubmit)} className="space-y-6">
-                    <div className="space-y-4">
-                      <FormField
-                        control={securityForm.control}
-                        name="currentPassword"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Current Password</FormLabel>
-                            <FormControl>
-                              <Input type="password" placeholder="••••••••" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={profileForm.control}
+                          name="username"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Username</FormLabel>
+                              <FormControl>
+                                <Input placeholder="username" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                       
-                      <FormField
-                        control={securityForm.control}
-                        name="newPassword"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>New Password</FormLabel>
-                            <FormControl>
-                              <Input type="password" placeholder="••••••••" {...field} />
-                            </FormControl>
-                            <FormDescription>
-                              At least 8 characters with a mix of letters, numbers and symbols
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <Button type="submit">Save Profile</Button>
+                    </form>
+                  </Form>
+                </TabsContent>
+                <TabsContent value="notifications" className="mt-6">
+                  <Form {...notificationForm}>
+                    <form onSubmit={notificationForm.handleSubmit(onNotificationSubmit)} className="space-y-6">
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-medium">Notification Channels</h3>
+                        <FormField
+                          control={notificationForm.control}
+                          name="emailNotifications"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">Email Notifications</FormLabel>
+                                <FormDescription>
+                                  Receive notifications via email
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={notificationForm.control}
+                          name="smsNotifications"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">SMS Notifications</FormLabel>
+                                <FormDescription>
+                                  Receive notifications via SMS
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={notificationForm.control}
+                          name="pushNotifications"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">Push Notifications</FormLabel>
+                                <FormDescription>
+                                  Receive push notifications in browser
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <Separator className="my-4" />
+                        
+                        <h3 className="text-lg font-medium">Notification Types</h3>
+                        <FormField
+                          control={notificationForm.control}
+                          name="campaignAlerts"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">Campaign Alerts</FormLabel>
+                                <FormDescription>
+                                  Alerts about your campaign performance
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={notificationForm.control}
+                          name="balanceAlerts"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">Balance Alerts</FormLabel>
+                                <FormDescription>
+                                  Alerts about your account balance
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={notificationForm.control}
+                          name="weeklyReports"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">Weekly Reports</FormLabel>
+                                <FormDescription>
+                                  Receive weekly performance reports
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
                       
-                      <FormField
-                        control={securityForm.control}
-                        name="confirmPassword"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Confirm New Password</FormLabel>
-                            <FormControl>
-                              <Input type="password" placeholder="••••••••" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <Button type="submit">Update Password</Button>
-                  </form>
-                </Form>
-                
-                <Separator className="my-6" />
-                
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Two-Factor Authentication</h3>
-                  <p className="text-sm text-gray-500">
-                    Add an extra layer of security to your account by enabling two-factor authentication.
-                  </p>
-                  <Button variant="outline">Enable 2FA</Button>
-                </div>
-                
-                <Separator className="my-6" />
-                
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-destructive">Danger Zone</h3>
-                  <p className="text-sm text-gray-500">
-                    Once you delete your account, there is no going back. Please be certain.
-                  </p>
-                  <Button variant="destructive">Delete Account</Button>
-                </div>
-              </TabsContent>
+                      <Button type="submit">Save Notification Settings</Button>
+                    </form>
+                  </Form>
+                </TabsContent>
+                <TabsContent value="appearance" className="mt-6">
+                  <Form {...appearanceForm}>
+                    <form onSubmit={appearanceForm.handleSubmit(onAppearanceSubmit)} className="space-y-6">
+                      <div className="space-y-4">
+                        <FormField
+                          control={appearanceForm.control}
+                          name="theme"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Theme</FormLabel>
+                              <FormControl>
+                                <ToggleGroup
+                                  type="single"
+                                  value={field.value}
+                                  onValueChange={(value) => {
+                                    if (value) field.onChange(value);
+                                  }}
+                                  className="justify-start"
+                                >
+                                  <ToggleGroupItem value="light">Light</ToggleGroupItem>
+                                  <ToggleGroupItem value="dark">Dark</ToggleGroupItem>
+                                  <ToggleGroupItem value="system">System</ToggleGroupItem>
+                                </ToggleGroup>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={appearanceForm.control}
+                          name="language"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Language</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select a language" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="en">English</SelectItem>
+                                  <SelectItem value="fr">French</SelectItem>
+                                  <SelectItem value="de">German</SelectItem>
+                                  <SelectItem value="es">Spanish</SelectItem>
+                                  <SelectItem value="pt">Portuguese</SelectItem>
+                                  <SelectItem value="ja">Japanese</SelectItem>
+                                  <SelectItem value="zh">Chinese</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={appearanceForm.control}
+                          name="timezone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Timezone</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select a timezone" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="UTC">UTC</SelectItem>
+                                  <SelectItem value="EST">Eastern Standard Time (EST)</SelectItem>
+                                  <SelectItem value="CST">Central Standard Time (CST)</SelectItem>
+                                  <SelectItem value="MST">Mountain Standard Time (MST)</SelectItem>
+                                  <SelectItem value="PST">Pacific Standard Time (PST)</SelectItem>
+                                  <SelectItem value="GMT">Greenwich Mean Time (GMT)</SelectItem>
+                                  <SelectItem value="CET">Central European Time (CET)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      <Button type="submit">Save Appearance Settings</Button>
+                    </form>
+                  </Form>
+                </TabsContent>
+                <TabsContent value="security" className="mt-6">
+                  <Form {...securityForm}>
+                    <form onSubmit={securityForm.handleSubmit(onSecuritySubmit)} className="space-y-6">
+                      <div className="space-y-4">
+                        <FormField
+                          control={securityForm.control}
+                          name="currentPassword"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Current Password</FormLabel>
+                              <FormControl>
+                                <Input type="password" placeholder="Enter your current password" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={securityForm.control}
+                          name="newPassword"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>New Password</FormLabel>
+                              <FormControl>
+                                <Input type="password" placeholder="Enter your new password" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={securityForm.control}
+                          name="confirmPassword"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Confirm New Password</FormLabel>
+                              <FormControl>
+                                <Input type="password" placeholder="Confirm your new password" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      
+                      <Button type="submit">Update Password</Button>
+                      
+                      <Separator className="my-6" />
+                      
+                      <div className="space-y-3">
+                        <h3 className="text-lg font-medium text-destructive">Delete Account</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Once you delete your account, there is no going back. Please be certain.
+                        </p>
+                        <Button variant="destructive">Delete Account</Button>
+                      </div>
+                    </form>
+                  </Form>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </div>
