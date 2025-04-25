@@ -45,9 +45,26 @@ export default function Templates() {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const { toast } = useToast();
 
-  const { data: templates, isLoading } = useQuery<Template[]>({
+  const { data: templatesData, isLoading } = useQuery({
     queryKey: ['/api/templates'],
   });
+  
+  // Process templates data from API response
+  const templates = (() => {
+    if (!templatesData) return [];
+    
+    // Handle array format
+    if (Array.isArray(templatesData)) {
+      return templatesData;
+    }
+    
+    // Handle SQL query response format
+    if (templatesData.rows && Array.isArray(templatesData.rows)) {
+      return templatesData.rows;
+    }
+    
+    return [];
+  })();
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);

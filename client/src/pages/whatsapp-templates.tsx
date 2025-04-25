@@ -29,10 +29,26 @@ export default function WhatsAppTemplates() {
   const { toast } = useToast();
 
   // Get all WhatsApp templates
-  const { data: templates, isLoading } = useQuery<Template[]>({
+  const { data: templatesData, isLoading } = useQuery({
     queryKey: ['/api/templates'],
-    select: (data) => data.filter(t => t.type?.toLowerCase() === 'whatsapp')
   });
+  
+  // Process templates data from API response
+  const templates = (() => {
+    if (!templatesData) return [];
+    
+    // Extract templates array based on response format
+    let templatesList: any[] = [];
+    
+    if (Array.isArray(templatesData)) {
+      templatesList = templatesData;
+    } else if (templatesData.rows && Array.isArray(templatesData.rows)) {
+      templatesList = templatesData.rows;
+    }
+    
+    // Filter for WhatsApp templates only
+    return templatesList.filter(t => t.type?.toLowerCase() === 'whatsapp');
+  })();
 
   // Mutation for creating a template
   const createTemplateMutation = useMutation({
