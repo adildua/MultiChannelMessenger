@@ -40,6 +40,12 @@ export function ContactList() {
   
   const { data: contacts, isLoading, isError } = useQuery<Contact[]>({
     queryKey: ['/api/contacts'],
+    onSuccess: (data) => {
+      console.log('Contacts loaded successfully:', data);
+    },
+    onError: (error) => {
+      console.error('Error loading contacts:', error);
+    }
   });
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {

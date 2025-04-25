@@ -217,7 +217,8 @@ export default function Contacts() {
               </div>
             </CardHeader>
             <CardContent>
-              <Tabs value={activeTab} className="hidden">
+              {/* Remove the hidden class that was causing contacts not to show */}
+              <Tabs value={activeTab}>
                 <TabsContent value="contacts" className="mt-0">
                   <ContactList />
                 </TabsContent>
