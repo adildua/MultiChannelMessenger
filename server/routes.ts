@@ -531,13 +531,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get(`${apiPrefix}/flows/active`, async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
     try {
-      // Get the tenant ID for the current user
-      const userTenant = await storage.getUserPrimaryTenant(req.session.userId);
+      // Get the tenant ID for the current user (or default user for development)
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
       if (!userTenant) {
         return res.status(404).json({ message: "No tenant found for user" });
       }
@@ -558,16 +555,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post(`${apiPrefix}/flows`, async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
     try {
       // Validate the request data
       const flowData = await storage.validateFlowData(req.body);
       
-      // Get the tenant ID for the current user
-      const userTenant = await storage.getUserPrimaryTenant(req.session.userId);
+      // Get the tenant ID for the current user (or default user for development)
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
       if (!userTenant) {
         return res.status(404).json({ message: "No tenant found for user" });
       }
@@ -592,10 +586,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.put(`${apiPrefix}/flows/:id`, async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
     try {
       const flowId = parseInt(req.params.id);
       if (isNaN(flowId)) {
@@ -605,8 +595,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate the request data
       const flowData = await storage.validateFlowData(req.body);
       
-      // Get the tenant ID for the current user
-      const userTenant = await storage.getUserPrimaryTenant(req.session.userId);
+      // Get the tenant ID for the current user (or default user for development)
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
       if (!userTenant) {
         return res.status(404).json({ message: "No tenant found for user" });
       }
@@ -638,13 +629,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Campaign routes
   app.get(`${apiPrefix}/campaigns`, async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
     try {
-      // Get the tenant ID for the current user
-      const userTenant = await storage.getUserPrimaryTenant(req.session.userId);
+      // Get the tenant ID for the current user (or default user for development)
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
       if (!userTenant) {
         return res.status(404).json({ message: "No tenant found for user" });
       }
@@ -766,19 +754,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Tenant routes
   app.get(`${apiPrefix}/tenants`, async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
     try {
-      // Get the tenant ID for the current user
-      const userTenant = await storage.getUserPrimaryTenant(req.session.userId);
+      // Get the tenant ID for the current user (or default user for development)
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
       if (!userTenant) {
         return res.status(404).json({ message: "No tenant found for user" });
       }
       
       // Check if the user is authorized to view other tenants (admin or higher role)
-      const userRole = await storage.getUserRoleInTenant(req.session.userId, userTenant.id);
+      const userRole = await storage.getUserRoleInTenant(userId, userTenant.id);
       if (userRole !== 'admin' && userRole !== 'owner') {
         return res.status(403).json({ message: "Not authorized to view tenants" });
       }
@@ -824,22 +809,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post(`${apiPrefix}/tenants`, async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
     try {
       // Validate the request data
       const tenantData = await storage.validateTenantData(req.body);
       
-      // Get the tenant ID for the current user
-      const userTenant = await storage.getUserPrimaryTenant(req.session.userId);
+      // Get the tenant ID for the current user (or default user for development)
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
       if (!userTenant) {
         return res.status(404).json({ message: "No tenant found for user" });
       }
       
       // Check if the user is authorized to create tenants (admin or higher role)
-      const userRole = await storage.getUserRoleInTenant(req.session.userId, userTenant.id);
+      const userRole = await storage.getUserRoleInTenant(userId, userTenant.id);
       if (userRole !== 'admin' && userRole !== 'owner') {
         return res.status(403).json({ message: "Not authorized to create tenants" });
       }
@@ -865,13 +847,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // API Integration routes
   app.get(`${apiPrefix}/api-integrations`, async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
     try {
-      // Get the tenant ID for the current user
-      const userTenant = await storage.getUserPrimaryTenant(req.session.userId);
+      // Get the tenant ID for the current user (or default user for development)
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
       if (!userTenant) {
         return res.status(404).json({ message: "No tenant found for user" });
       }
@@ -901,16 +880,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post(`${apiPrefix}/api-integrations`, async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
     try {
       // Validate the request data
       const integrationData = await storage.validateApiIntegrationData(req.body);
       
-      // Get the tenant ID for the current user
-      const userTenant = await storage.getUserPrimaryTenant(req.session.userId);
+      // Get the tenant ID for the current user (or default user for development)
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
       if (!userTenant) {
         return res.status(404).json({ message: "No tenant found for user" });
       }
