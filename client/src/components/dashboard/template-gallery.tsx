@@ -15,7 +15,7 @@ interface TemplateGalleryProps {
 }
 
 export function TemplateGallery({ onNewTemplate }: TemplateGalleryProps) {
-  const { data: templates, isLoading } = useQuery<Template[]>({
+  const { data: templates, isLoading } = useQuery({
     queryKey: ['/api/templates'],
   });
 
@@ -42,8 +42,18 @@ export function TemplateGallery({ onNewTemplate }: TemplateGalleryProps) {
       type: "WhatsApp, SMS",
     }
   ];
+  
+  // Fix for the response format from our SQL query
+  let templateArray: any[] = [];
+  if (templates) {
+    if (Array.isArray(templates)) {
+      templateArray = templates;
+    } else if (templates.rows && Array.isArray(templates.rows)) {
+      templateArray = templates.rows;
+    }
+  }
 
-  const templatesToDisplay = templates || mockTemplates;
+  const templatesToDisplay = templateArray.length > 0 ? templateArray : mockTemplates;
 
   return (
     <Card className="overflow-hidden">

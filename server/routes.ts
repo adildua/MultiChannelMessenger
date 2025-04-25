@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "@db";
 import { users, tenants, tenantLevels, contacts, contactLists, channels, templates, flows, campaigns, conversations, transactions, messages, apiIntegrations, channelRates } from "@shared/schema";
-import { eq, and, gte, desc, asc, isNull } from "drizzle-orm";
+import { eq, and, gte, desc, asc, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import { createInsertSchema } from "drizzle-zod";
 import Stripe from "stripe";
@@ -474,10 +474,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "No tenant found for user" });
       }
       
-      const templatesList = await db.query.templates.findMany({
-        where: eq(templates.tenantId, userTenant.id),
-        orderBy: [desc(templates.createdAt)]
-      });
+      // Use SQL query to get templates while we're updating schema
+      const templatesList = await db.execute(sql`
+        SELECT id, tenant_id as "tenantId", name, type, content, 
+               variables, preview_data as "previewData", metadata, 
+               is_active as "isActive", created_at as "createdAt", 
+               updated_at as "updatedAt" 
+        FROM templates 
+        WHERE tenant_id = ${userTenant.id} 
+        ORDER BY created_at DESC
+      `);
       
       return res.json(templatesList);
     } catch (error) {
