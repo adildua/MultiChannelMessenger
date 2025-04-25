@@ -128,6 +128,7 @@ export const templates = pgTable("templates", {
   content: text("content").notNull(),
   variables: jsonb("variables"),
   previewData: jsonb("preview_data"),
+  metadata: jsonb("metadata"), // For WhatsApp template specific data (category, language, headerType, footer)
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()
@@ -394,7 +395,15 @@ export type Tenant = typeof tenants.$inferSelect;
 export type TenantInsert = z.infer<typeof insertTenantSchema>;
 export type Contact = typeof contacts.$inferSelect;
 export type ContactInsert = z.infer<typeof insertContactSchema>;
-export type Template = typeof templates.$inferSelect;
+export type Template = typeof templates.$inferSelect & {
+  metadata?: {
+    category?: string;
+    language?: string;
+    headerType?: string;
+    footer?: string;
+    variables?: Record<string, string>;
+  };
+};
 export type TemplateInsert = z.infer<typeof insertTemplateSchema>;
 export type Campaign = typeof campaigns.$inferSelect;
 export type CampaignInsert = z.infer<typeof insertCampaignSchema>;

@@ -8,6 +8,7 @@ import Campaigns from "@/pages/campaigns";
 import Contacts from "@/pages/contacts";
 import FlowBuilder from "@/pages/flow-builder";
 import Templates from "@/pages/templates";
+import WhatsAppTemplates from "@/pages/whatsapp-templates";
 import Conversations from "@/pages/conversations";
 import ApiIntegrations from "@/pages/api-integrations";
 import TenantManagement from "@/pages/tenant-management";
