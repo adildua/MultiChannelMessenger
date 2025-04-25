@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface TopupFormProps {
   onSuccess?: () => void;
@@ -18,10 +18,19 @@ export function TopupForm({ onSuccess }: TopupFormProps) {
 
   const topupMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("POST", "/api/create-payment-intent", { amount });
+      // Use direct topup for testing purposes
+      return apiRequest("POST", "/api/direct-topup", { amount });
     },
     onSuccess: (response) => {
-      navigate("/checkout");
+      toast({
+        title: "Account Topped Up",
+        description: `Successfully added $${amount} to your account balance.`,
+      });
+      
+      // Invalidate the balance query to refresh the UI
+      queryClient.invalidateQueries({ queryKey: ['/api/user/balance'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
+      
       if (onSuccess) {
         onSuccess();
       }
@@ -29,7 +38,7 @@ export function TopupForm({ onSuccess }: TopupFormProps) {
     onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to create payment. Please try again.",
+        description: "Failed to add funds. Please try again.",
         variant: "destructive",
       });
     }
@@ -97,7 +106,7 @@ export function TopupForm({ onSuccess }: TopupFormProps) {
           className="w-full"
           disabled={topupMutation.isPending}
         >
-          {topupMutation.isPending ? "Processing..." : "Proceed to Payment"}
+          {topupMutation.isPending ? "Processing..." : "Add Funds to Account"}
         </Button>
       </form>
     </div>

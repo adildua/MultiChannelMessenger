@@ -1357,6 +1357,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add direct balance endpoint for testing
+  app.post(`${apiPrefix}/direct-topup`, async (req, res) => {
+    try {
+      const { amount } = req.body;
+      
+      if (!amount || isNaN(parseFloat(amount))) {
+        return res.status(400).json({ message: "Valid amount is required" });
+      }
+      
+      // Get the tenant ID for the current user
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
+      if (!userTenant) {
+        return res.status(404).json({ message: "No tenant found for user" });
+      }
+      
+      // Update the tenant's balance
+      const currentBalance = parseFloat(userTenant.balance || "0");
+      const topupAmount = parseFloat(amount);
+      const updatedBalance = currentBalance + topupAmount;
+      
+      // Update the tenant record
+      await db.update(tenants)
+        .set({ 
+          balance: updatedBalance.toString(),
+          updatedAt: new Date()
+        })
+        .where(eq(tenants.id, userTenant.id));
+      
+      // Create a transaction record
+      const transaction = await db.insert(transactions).values({
+        tenantId: userTenant.id,
+        amount: amount.toString(),
+        type: "topup",
+        status: "completed",
+        description: "Direct topup",
+        currency: userTenant.currencyCode || "USD",
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }).returning();
+      
+      return res.status(201).json({
+        transaction: transaction[0],
+        balance: updatedBalance
+      });
+    } catch (error) {
+      console.error("Direct topup error:", error);
+      return res.status(500).json({ message: "Error processing topup" });
+    }
+  });
+
+  // Get user balance endpoint
+  app.get(`${apiPrefix}/user/balance`, async (req, res) => {
+    try {
+      // Get the tenant ID for the current user
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
+      if (!userTenant) {
+        return res.status(404).json({ message: "No tenant found for user" });
+      }
+      
+      // Extract balance and currency from tenant
+      return res.json({
+        balance: parseFloat(userTenant.balance || "0"),
+        currency: userTenant.currencyCode || "USD"
+      });
+    } catch (error) {
+      console.error("Get user balance error:", error);
+      return res.status(500).json({ message: "Error fetching user balance" });
+    }
+  });
+
   // Analytics endpoints will be added later
 
   // Stripe payment routes
@@ -1421,7 +1493,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const transaction = await db.insert(transactions).values({
         tenantId: userTenant.id,
         amount: amount.toString(), // Use string for amount to match schema
-        type: "payment",
+        type: "topup", // Change from "payment" to "topup" for clarity
         status: "completed",
         currency: userTenant.currencyCode || "USD",
         metadata: {
@@ -1432,7 +1504,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }).returning();
       
       // Update the tenant's balance
-      // TODO: Implement balance update logic
+      const currentBalance = parseFloat(userTenant.balance || "0");
+      const updatedBalance = currentBalance + parseFloat(amount);
+      
+      // Update the tenant's balance in the database
+      await db.update(tenants)
+        .set({ 
+          balance: updatedBalance.toString(),
+          updatedAt: new Date()
+        })
+        .where(eq(tenants.id, userTenant.id));
       
       return res.status(201).json(transaction[0]);
     } catch (error) {
