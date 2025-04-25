@@ -20,14 +20,16 @@ export function TenantManagement({ onAddTenant }: TenantManagementProps) {
   });
 
   // Function to get tenant level class
-  const getLevelClass = (level: number) => {
-    switch (level) {
+  const getLevelClass = (level: any) => {
+    const levelId = typeof level === 'object' && level !== null ? level.id : level;
+    
+    switch (levelId) {
       case 1:
-        return 'tenant-level-1';
+        return 'bg-blue-100 text-blue-800';
       case 2:
-        return 'tenant-level-2';
+        return 'bg-purple-100 text-purple-800';
       case 3:
-        return 'tenant-level-3';
+        return 'bg-green-100 text-green-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -106,18 +108,20 @@ export function TenantManagement({ onAddTenant }: TenantManagementProps) {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 py-1 text-xs font-medium rounded ${getLevelClass(tenant.level)}`}>
-                      Level {tenant.level}
+                      {typeof tenant.level === 'object' && tenant.level !== null 
+                        ? tenant.level.name 
+                        : `Level ${tenant.level || 'N/A'}`}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {tenant.contacts ? tenant.contacts.toLocaleString() : 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {typeof tenant.balance === 'number' 
+                    {tenant.balance 
                       ? new Intl.NumberFormat('en-US', { 
                           style: 'currency', 
-                          currency: tenant.currencyCode || 'USD' 
-                        }).format(tenant.balance)
+                          currency: tenant.currencyCode || tenant.currency || 'USD' 
+                        }).format(Number(tenant.balance))
                       : 'N/A'
                     }
                   </td>
