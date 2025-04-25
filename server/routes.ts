@@ -133,6 +133,144 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Export contacts as CSV
+  app.get(`${apiPrefix}/contacts/export`, async (req, res) => {
+    try {
+      // Get the tenant ID for the current user
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
+      if (!userTenant) {
+        return res.status(404).json({ message: "No tenant found for user" });
+      }
+      
+      const contactsList = await db.query.contacts.findMany({
+        where: eq(contacts.tenantId, userTenant.id),
+        orderBy: [desc(contacts.createdAt)]
+      });
+      
+      // Create CSV headers
+      let csv = "First Name,Last Name,Email,Phone,WhatsApp,Status\n";
+      
+      // Add each contact as a row
+      contactsList.forEach(contact => {
+        // Escape any commas in the fields
+        const row = [
+          contact.firstName.includes(',') ? `"${contact.firstName}"` : contact.firstName,
+          contact.lastName ? (contact.lastName.includes(',') ? `"${contact.lastName}"` : contact.lastName) : '',
+          contact.email ? (contact.email.includes(',') ? `"${contact.email}"` : contact.email) : '',
+          contact.phone ? (contact.phone.includes(',') ? `"${contact.phone}"` : contact.phone) : '',
+          contact.whatsapp ? (contact.whatsapp.includes(',') ? `"${contact.whatsapp}"` : contact.whatsapp) : '',
+          contact.isActive ? 'Active' : 'Inactive'
+        ];
+        csv += row.join(',') + '\n';
+      });
+      
+      // Set headers for file download
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename=contacts.csv');
+      res.status(200).send(csv);
+    } catch (error) {
+      console.error("Export contacts error:", error);
+      return res.status(500).json({ message: "Error exporting contacts" });
+    }
+  });
+  
+  // Import contacts from CSV
+  app.post(`${apiPrefix}/contacts/import`, async (req, res) => {
+    try {
+      const csvData = req.body.data;
+      
+      if (!csvData) {
+        return res.status(400).json({ message: "No CSV data provided" });
+      }
+      
+      // Get the tenant ID for the current user
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
+      if (!userTenant) {
+        return res.status(404).json({ message: "No tenant found for user" });
+      }
+      
+      // Parse CSV data (very simple parser)
+      const lines = csvData.split('\n');
+      const headers = lines[0].split(',');
+      
+      // Check required headers
+      const requiredHeaders = ['First Name'];
+      const missingHeaders = requiredHeaders.filter(header => 
+        !headers.some(h => h.trim().toLowerCase() === header.toLowerCase())
+      );
+      
+      if (missingHeaders.length > 0) {
+        return res.status(400).json({ 
+          message: `Missing required headers: ${missingHeaders.join(', ')}` 
+        });
+      }
+      
+      // Get indexes of each column
+      const firstNameIdx = headers.findIndex(h => h.trim().toLowerCase() === 'first name');
+      const lastNameIdx = headers.findIndex(h => h.trim().toLowerCase() === 'last name');
+      const emailIdx = headers.findIndex(h => h.trim().toLowerCase() === 'email');
+      const phoneIdx = headers.findIndex(h => h.trim().toLowerCase() === 'phone');
+      const whatsappIdx = headers.findIndex(h => h.trim().toLowerCase() === 'whatsapp');
+      const statusIdx = headers.findIndex(h => h.trim().toLowerCase() === 'status');
+      
+      // Process each line (skip header)
+      const contacts = [];
+      const errors = [];
+      
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue; // Skip empty lines
+        
+        const values = lines[i].split(',');
+        
+        // Simple validation
+        if (!values[firstNameIdx]?.trim()) {
+          errors.push(`Line ${i+1}: First Name is required`);
+          continue;
+        }
+        
+        const contact = {
+          tenantId: userTenant.id,
+          firstName: values[firstNameIdx]?.trim() || '',
+          lastName: lastNameIdx >= 0 ? values[lastNameIdx]?.trim() || null : null,
+          email: emailIdx >= 0 ? values[emailIdx]?.trim() || null : null,
+          phone: phoneIdx >= 0 ? values[phoneIdx]?.trim() || null : null,
+          whatsapp: whatsappIdx >= 0 ? values[whatsappIdx]?.trim() || null : null,
+          isActive: statusIdx >= 0 ? values[statusIdx]?.trim().toLowerCase() === 'active' : true
+        };
+        
+        try {
+          // Validate the contact data
+          const validContact = await storage.validateContactData(contact);
+          contacts.push(validContact);
+        } catch (err) {
+          errors.push(`Line ${i+1}: ${err.message}`);
+        }
+      }
+      
+      // Insert valid contacts
+      let inserted = 0;
+      for (const contact of contacts) {
+        try {
+          await storage.insertContact(contact);
+          inserted++;
+        } catch (err) {
+          errors.push(`Error inserting contact ${contact.firstName}: ${err.message}`);
+        }
+      }
+      
+      return res.status(200).json({
+        success: true,
+        imported: inserted,
+        errors: errors.length > 0 ? errors : null
+      });
+    } catch (error) {
+      console.error("Import contacts error:", error);
+      return res.status(500).json({ message: "Error importing contacts" });
+    }
+  });
+  
   app.get(`${apiPrefix}/contacts/stats`, async (req, res) => {
     try {
       // Get the tenant ID for the current user

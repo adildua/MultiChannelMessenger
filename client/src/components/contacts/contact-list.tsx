@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, ChangeEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Contact } from "@shared/schema";
 import {
@@ -18,17 +18,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogTitle, DialogHeader } from "@/components/ui/dialog";
-import { Pencil, Trash2, MoreHorizontal, FileDown, FileUp, UserPlus } from "lucide-react";
+import { Pencil, Trash2, MoreHorizontal, FileDown, FileUp, UserPlus, AlertCircle, CheckCircle2 } from "lucide-react";
 import { ContactForm } from "./contact-form";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function ContactList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showAddEditDialog, setShowAddEditDialog] = useState(false);
   const [selectedContact, setSelectedContact] = useState<Contact | undefined>(undefined);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importProgress, setImportProgress] = useState(0);
+  const [importStatus, setImportStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [importResults, setImportResults] = useState<{imported: number, errors: string[] | null}>();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   
   const { data: contacts, isLoading, isError } = useQuery<Contact[]>({
@@ -77,15 +84,128 @@ export function ContactList() {
   };
 
   const handleImport = () => {
+    // Reset import state
+    setImportFile(null);
+    setImportProgress(0);
+    setImportStatus('idle');
+    setImportResults(undefined);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
     setShowImportDialog(true);
   };
 
-  const handleExport = () => {
-    // Implementation for export functionality
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setImportFile(e.target.files[0]);
+    }
+  };
+
+  const processImport = async () => {
+    if (!importFile) {
+      toast({
+        title: "No file selected",
+        description: "Please select a CSV file to import.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setImportStatus('loading');
+    setImportProgress(10);
+
+    try {
+      // Read the file
+      const fileContent = await importFile.text();
+      setImportProgress(30);
+
+      // Send to API
+      const response = await apiRequest('POST', '/api/contacts/import', { data: fileContent });
+      setImportProgress(90);
+      
+      const result = await response.json();
+      setImportProgress(100);
+      
+      if (result.success) {
+        setImportStatus('success');
+        setImportResults({
+          imported: result.imported,
+          errors: result.errors
+        });
+        
+        // Refresh contacts list
+        queryClient.invalidateQueries({ queryKey: ['/api/contacts'] });
+        
+        if (!result.errors) {
+          toast({
+            title: "Import successful",
+            description: `${result.imported} contacts were imported successfully.`,
+          });
+        }
+      } else {
+        setImportStatus('error');
+        toast({
+          title: "Import failed",
+          description: result.message || "Failed to import contacts.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      setImportStatus('error');
+      toast({
+        title: "Import error",
+        description: "An error occurred while importing contacts.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleExport = async () => {
     toast({
       title: "Export started",
       description: "Your contacts are being exported. Download will start shortly.",
     });
+    
+    try {
+      // Use fetch directly since we need the raw response
+      const response = await fetch('/api/contacts/export', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Export failed');
+      }
+      
+      // Get the content
+      const blob = await response.blob();
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = 'contacts.csv';
+      document.body.appendChild(a);
+      a.click();
+      
+      // Clean up
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast({
+        title: "Export complete",
+        description: "Your contacts have been exported successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Export failed",
+        description: "An error occurred while exporting contacts.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading) {
