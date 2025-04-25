@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { CreditCard } from "lucide-react";
 
 interface BalanceWidgetProps {
@@ -11,7 +11,7 @@ interface BalanceWidgetProps {
 }
 
 export function BalanceWidget({ className, balance, currency = "USD" }: BalanceWidgetProps) {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   
   // If balance was not passed as a prop, fetch it from the API
   const { data } = useQuery({
@@ -40,7 +40,7 @@ export function BalanceWidget({ className, balance, currency = "USD" }: BalanceW
           variant="outline" 
           size="sm" 
           className="w-full"
-          onClick={() => navigate("/checkout")}
+          onClick={() => setLocation("/checkout")}
         >
           <CreditCard className="h-4 w-4 mr-2" />
           Add Funds

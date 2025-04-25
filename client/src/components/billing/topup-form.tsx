@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +14,7 @@ export function TopupForm({ onSuccess }: TopupFormProps) {
   const [amount, setAmount] = useState("50");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Only allow numbers and decimal points
@@ -40,7 +40,7 @@ export function TopupForm({ onSuccess }: TopupFormProps) {
 
     try {
       // Instead of processing payment here, redirect to checkout page
-      navigate(`/checkout?amount=${numAmount}`);
+      setLocation(`/checkout?amount=${numAmount}`);
       if (onSuccess) {
         onSuccess();
       }

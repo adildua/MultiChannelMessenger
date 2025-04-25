@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Transaction } from "@shared/schema";
 import {
   Table,
@@ -8,14 +9,22 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  ArrowUpRight,
-  ArrowDownRight,
-  RefreshCw,
-  AlertCircle,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  ArrowDownCircle,
+  ArrowUpCircle,
+  Calendar,
   CreditCard,
-  BanknoteIcon,
+  Search,
+  ArrowUpDown,
 } from "lucide-react";
-import { format } from "date-fns";
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -23,154 +32,171 @@ interface TransactionListProps {
 }
 
 export function TransactionList({ transactions, isLoading }: TransactionListProps) {
-  // Function to format currency amount
-  const formatCurrency = (amount: number, currency = 'USD') => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency,
-    }).format(amount);
-  };
+  const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<"newest" | "oldest" | "amount-high" | "amount-low">("newest");
 
-  // Function to format date
-  const formatDate = (dateString: string) => {
-    try {
-      return format(new Date(dateString), 'MMM dd, yyyy h:mm a');
-    } catch (error) {
-      return dateString;
+  // Filter transactions based on type and search
+  const filteredTransactions = transactions.filter((transaction) => {
+    const matchesFilter = filter === "all" || transaction.type === filter;
+    const matchesSearch = search === "" || 
+      (transaction.description && transaction.description.toLowerCase().includes(search.toLowerCase())) ||
+      transaction.reference?.toLowerCase().includes(search.toLowerCase());
+    
+    return matchesFilter && matchesSearch;
+  });
+
+  // Sort transactions
+  const sortedTransactions = [...filteredTransactions].sort((a, b) => {
+    if (sort === "newest") {
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    } else if (sort === "oldest") {
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    } else if (sort === "amount-high") {
+      return parseFloat(b.amount as string) - parseFloat(a.amount as string);
+    } else if (sort === "amount-low") {
+      return parseFloat(a.amount as string) - parseFloat(b.amount as string);
     }
-  };
-
-  // Function to get transaction icon
-  const getTransactionIcon = (type: string) => {
-    switch (type) {
-      case 'topup':
-        return <ArrowUpRight className="h-5 w-5 text-green-500" />;
-      case 'charge':
-        return <ArrowDownRight className="h-5 w-5 text-red-500" />;
-      case 'refund':
-        return <RefreshCw className="h-5 w-5 text-blue-500" />;
-      default:
-        return <BanknoteIcon className="h-5 w-5 text-gray-500" />;
-    }
-  };
-
-  // Mock transactions data for UI demonstration
-  const mockTransactions = [
-    {
-      id: 1,
-      type: 'topup',
-      amount: 500,
-      currencyCode: 'USD',
-      description: 'Account credit via credit card',
-      reference: 'CC-1234567',
-      balanceBefore: 100,
-      balanceAfter: 600,
-      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 2,
-      type: 'charge',
-      amount: 25.50,
-      currencyCode: 'USD',
-      description: 'SMS campaign: Summer Sale',
-      reference: 'CAM-7654321',
-      balanceBefore: 600,
-      balanceAfter: 574.50,
-      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 3,
-      type: 'charge',
-      amount: 58.20,
-      currencyCode: 'USD',
-      description: 'VOIP campaign: Customer Feedback',
-      reference: 'CAM-8765432',
-      balanceBefore: 574.50,
-      balanceAfter: 516.30,
-      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 4,
-      type: 'refund',
-      amount: 10.00,
-      currencyCode: 'USD',
-      description: 'Refund for failed messages',
-      reference: 'REF-9876543',
-      balanceBefore: 516.30,
-      balanceAfter: 526.30,
-      createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
-    },
-    {
-      id: 5,
-      type: 'topup',
-      amount: 200,
-      currencyCode: 'USD',
-      description: 'Account credit via bank transfer',
-      reference: 'BT-1234567',
-      balanceBefore: 526.30,
-      balanceAfter: 726.30,
-      createdAt: new Date().toISOString()
-    }
-  ];
-
-  // Use mock data if no transactions available
-  const transactionsToShow = transactions.length > 0 ? transactions : mockTransactions;
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+    return 0;
+  });
 
   return (
-    <div className="rounded-md border overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Type</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead>Reference</TableHead>
-            <TableHead>Amount</TableHead>
-            <TableHead>Balance</TableHead>
-            <TableHead>Date</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {transactionsToShow.length > 0 ? (
-            transactionsToShow.map((transaction) => (
-              <TableRow key={transaction.id}>
-                <TableCell>
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between space-y-3 sm:space-y-0 sm:space-x-4">
+        <div className="flex-1 relative">
+          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Search transactions..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-8"
+          />
+        </div>
+        <div className="flex space-x-2">
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Filter" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="topup">Top Ups</SelectItem>
+              <SelectItem value="charge">Charges</SelectItem>
+              <SelectItem value="refund">Refunds</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select value={sort} onValueChange={(val) => setSort(val as any)}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest first</SelectItem>
+              <SelectItem value="oldest">Oldest first</SelectItem>
+              <SelectItem value="amount-high">Amount (high-low)</SelectItem>
+              <SelectItem value="amount-low">Amount (low-high)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center items-center py-8">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+        </div>
+      ) : sortedTransactions.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-8 text-center">
+          <div className="rounded-full bg-gray-100 p-3 mb-2">
+            <CreditCard className="h-6 w-6 text-gray-400" />
+          </div>
+          <h3 className="text-lg font-medium">No transactions found</h3>
+          <p className="text-sm text-gray-500 mt-1">
+            {search || filter !== "all" 
+              ? "Try changing your search or filter criteria" 
+              : "Your transaction history will appear here"}
+          </p>
+        </div>
+      ) : (
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12"></TableHead>
+                <TableHead className="w-[180px]">
                   <div className="flex items-center">
-                    {getTransactionIcon(transaction.type)}
-                    <span className="ml-2 capitalize">{transaction.type}</span>
+                    <Calendar className="h-4 w-4 mr-1" />
+                    Date
                   </div>
-                </TableCell>
-                <TableCell>{transaction.description}</TableCell>
-                <TableCell>{transaction.reference}</TableCell>
-                <TableCell className={transaction.type === 'charge' ? 'text-red-600' : transaction.type === 'topup' ? 'text-green-600' : ''}>
-                  {transaction.type === 'charge' ? '- ' : transaction.type === 'topup' ? '+ ' : ''}
-                  {formatCurrency(transaction.amount, transaction.currencyCode)}
-                </TableCell>
-                <TableCell>
-                  {formatCurrency(transaction.balanceAfter, transaction.currencyCode)}
-                </TableCell>
-                <TableCell>{formatDate(transaction.createdAt)}</TableCell>
+                </TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Reference</TableHead>
+                <TableHead className="text-right">
+                  <div className="flex items-center justify-end">
+                    <ArrowUpDown className="h-4 w-4 mr-1" />
+                    Amount
+                  </div>
+                </TableHead>
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center py-10">
-                <div className="flex flex-col items-center">
-                  <AlertCircle className="h-8 w-8 text-gray-400 mb-2" />
-                  <p className="text-gray-500">No transactions found</p>
-                </div>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            </TableHeader>
+            <TableBody>
+              {sortedTransactions.map((transaction) => (
+                <TableRow key={transaction.id}>
+                  <TableCell>
+                    {transaction.type === "topup" ? (
+                      <ArrowUpCircle className="h-5 w-5 text-green-500" />
+                    ) : transaction.type === "refund" ? (
+                      <ArrowUpCircle className="h-5 w-5 text-blue-500" />
+                    ) : (
+                      <ArrowDownCircle className="h-5 w-5 text-red-500" />
+                    )}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {new Date(transaction.createdAt).toLocaleString(undefined, {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span>{transaction.description || "Transaction"}</span>
+                      <Badge 
+                        variant={
+                          transaction.type === "topup" 
+                            ? "success" 
+                            : transaction.type === "refund" 
+                            ? "secondary" 
+                            : "destructive"
+                        }
+                        className="w-fit capitalize text-xs mt-1"
+                      >
+                        {transaction.type}
+                      </Badge>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-gray-500">
+                    {transaction.reference || "-"}
+                  </TableCell>
+                  <TableCell className="text-right whitespace-nowrap font-medium">
+                    <span className={
+                      transaction.type === "topup" || transaction.type === "refund"
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }>
+                      {transaction.type === "topup" || transaction.type === "refund" ? "+" : "-"}
+                      {new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: transaction.currency || "USD",
+                      }).format(parseFloat(transaction.amount as string))}
+                    </span>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 }
