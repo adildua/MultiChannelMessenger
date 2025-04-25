@@ -41,6 +41,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useTheme } from "@/components/theme-provider";
 
 // Profile settings form schema
 const profileFormSchema = z.object({

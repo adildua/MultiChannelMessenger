@@ -29,11 +29,14 @@ const SidebarNavItem = ({ href, icon: Icon, label, isActive }: SidebarNavItemPro
       className={cn(
         "flex items-center px-2 py-2 text-base font-medium rounded-md group transition-colors", 
         isActive 
-          ? "bg-sidebar-accent text-sidebar-foreground" 
-          : "text-sidebar-foreground/70 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground"
+          ? "bg-gray-900 text-white dark:bg-gray-800" 
+          : "text-gray-300 hover:bg-gray-700 hover:text-white dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
       )}
     >
-      <Icon className="mr-3 h-5 w-5 text-sidebar-primary" />
+      <Icon className={cn(
+        "mr-3 h-5 w-5", 
+        isActive ? "text-primary" : "text-gray-400 group-hover:text-gray-300 dark:group-hover:text-gray-300"
+      )} />
       {label}
     </Link>
   );
@@ -61,9 +64,9 @@ export function Sidebar({ className }: SidebarProps) {
   ];
 
   return (
-    <div className={cn("flex flex-col w-64 bg-sidebar", className)}>
-      <div className="flex items-center justify-center h-16 px-4 bg-sidebar-header">
-        <span className="text-sidebar-foreground text-lg font-semibold">OMNI<span className="text-primary">COMM</span></span>
+    <div className={cn("flex flex-col w-64 bg-gray-800 dark:bg-gray-900", className)}>
+      <div className="flex items-center justify-center h-16 px-4 bg-gray-900 dark:bg-gray-950">
+        <span className="text-white text-lg font-semibold">OMNI<span className="text-primary">COMM</span></span>
       </div>
       
       {/* Sidebar Navigation */}
@@ -82,13 +85,13 @@ export function Sidebar({ className }: SidebarProps) {
       </div>
       
       {/* User Menu */}
-      <div className="flex items-center p-4 border-t border-sidebar-border">
+      <div className="flex items-center p-4 border-t border-gray-700 dark:border-gray-800">
         <div className="flex-shrink-0">
           <img className="h-10 w-10 rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="User avatar" />
         </div>
         <div className="ml-3">
-          <p className="text-sm font-medium text-sidebar-foreground">Alex Morgan</p>
-          <p className="text-xs font-medium text-sidebar-foreground/70">Administrator</p>
+          <p className="text-sm font-medium text-white">Alex Morgan</p>
+          <p className="text-xs font-medium text-gray-300 dark:text-gray-400">Administrator</p>
         </div>
       </div>
     </div>

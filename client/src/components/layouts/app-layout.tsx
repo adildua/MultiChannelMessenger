@@ -43,12 +43,12 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* Main Content */}
       <div className="flex flex-col flex-1 overflow-hidden">
         {/* Top Navigation */}
-        <header className="relative z-10 flex-shrink-0 flex h-16 bg-background border-b">
+        <header className="relative z-10 flex-shrink-0 flex h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
           {isMobile && (
             <Button 
               variant="ghost" 
               size="icon"
-              className="md:hidden px-4 text-muted-foreground" 
+              className="md:hidden px-4 text-gray-500 dark:text-gray-400" 
               onClick={() => setSidebarOpen(true)}
             >
               <span className="sr-only">Open sidebar</span>
@@ -60,13 +60,13 @@ export function AppLayout({ children }: AppLayoutProps) {
             <div className="flex-1 flex">
               <div className="w-full flex md:ml-0">
                 <label htmlFor="search-field" className="sr-only">Search</label>
-                <div className="relative w-full text-muted-foreground focus-within:text-foreground">
+                <div className="relative w-full text-gray-500 dark:text-gray-400 focus-within:text-gray-700 dark:focus-within:text-gray-300">
                   <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none">
                     <Search className="h-5 w-5 ml-3" />
                   </div>
                   <Input 
                     id="search-field" 
-                    className="block w-full h-full pl-10 pr-3 py-2 border-transparent bg-background placeholder:text-muted-foreground focus:outline-none focus:ring-0 focus:border-transparent sm:text-sm" 
+                    className="block w-full h-full pl-10 pr-3 py-2 border-transparent bg-white dark:bg-gray-900 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-0 focus:border-transparent sm:text-sm" 
                     placeholder="Search" 
                     type="search"
                   />
@@ -78,14 +78,14 @@ export function AppLayout({ children }: AppLayoutProps) {
             <div className="ml-4 flex items-center md:ml-6">
               {/* Balance Widget */}
               <div className="hidden sm:flex items-center mr-4">
-                <Link href="/billing" className="flex items-center gap-1.5 text-sm font-medium hover:text-primary">
+                <Link href="/billing" className="flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary">
                   <Wallet className="h-4 w-4" /> 
                   <span>$1,250.00</span>
                 </Link>
               </div>
               
               {/* Notifications */}
-              <Button variant="ghost" size="icon" className="p-1 rounded-full text-muted-foreground hover:text-foreground">
+              <Button variant="ghost" size="icon" className="p-1 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
                 <span className="sr-only">View notifications</span>
                 <Bell className="h-6 w-6" />
               </Button>
