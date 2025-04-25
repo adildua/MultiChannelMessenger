@@ -143,120 +143,116 @@ export default function Analytics() {
           {/* Main Analytics Content */}
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle>Performance Analytics</CardTitle>
-                  <CardDescription>
-                    Insights across your communication channels
-                  </CardDescription>
-                </div>
-                <Tabs
-                  defaultValue="overview"
-                  value={activeTab}
-                  onValueChange={setActiveTab}
-                  className="w-[400px]"
-                >
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="channels">Channels</TabsTrigger>
-                    <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
+              <CardTitle>Performance Analytics</CardTitle>
+              <CardDescription>
+                Insights across your communication channels
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <TabsContent value="overview" className="mt-0">
-                {/* Overview Tab */}
-                <div className="space-y-6">
-                  {/* Stats Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Tabs
+                defaultValue="overview"
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="channels">Channels</TabsTrigger>
+                  <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+                </TabsList>
+                <TabsContent value="overview" className="mt-6">
+                  {/* Overview Tab */}
+                  <div className="space-y-6">
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium text-gray-500">Total Messages</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-2xl font-bold">124,578</div>
+                          <div className="text-xs text-green-500 flex items-center mt-1">
+                            <span className="flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                              </svg>
+                              18.2%
+                            </span>
+                            <span className="text-gray-400 ml-1">vs last period</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium text-gray-500">Delivery Rate</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-2xl font-bold">97.8%</div>
+                          <div className="text-xs text-green-500 flex items-center mt-1">
+                            <span className="flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                              </svg>
+                              2.1%
+                            </span>
+                            <span className="text-gray-400 ml-1">vs last period</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium text-gray-500">Response Rate</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-2xl font-bold">24.3%</div>
+                          <div className="text-xs text-red-500 flex items-center mt-1">
+                            <span className="flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                              1.8%
+                            </span>
+                            <span className="text-gray-400 ml-1">vs last period</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium text-gray-500">Avg. Cost</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="text-2xl font-bold">$0.018</div>
+                          <div className="text-xs text-green-500 flex items-center mt-1">
+                            <span className="flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                              0.3%
+                            </span>
+                            <span className="text-gray-400 ml-1">vs last period</span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    {/* Main Chart */}
                     <Card>
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-500">Total Messages</CardTitle>
+                        <CardTitle>Message Volume Over Time</CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">124,578</div>
-                        <div className="text-xs text-green-500 flex items-center mt-1">
-                          <span className="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                            </svg>
-                            18.2%
-                          </span>
-                          <span className="text-gray-400 ml-1">vs last period</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-500">Delivery Rate</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">97.8%</div>
-                        <div className="text-xs text-green-500 flex items-center mt-1">
-                          <span className="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                            </svg>
-                            2.1%
-                          </span>
-                          <span className="text-gray-400 ml-1">vs last period</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-500">Response Rate</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">24.3%</div>
-                        <div className="text-xs text-red-500 flex items-center mt-1">
-                          <span className="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                            1.8%
-                          </span>
-                          <span className="text-gray-400 ml-1">vs last period</span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-500">Avg. Cost</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">$0.018</div>
-                        <div className="text-xs text-green-500 flex items-center mt-1">
-                          <span className="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                            0.3%
-                          </span>
-                          <span className="text-gray-400 ml-1">vs last period</span>
-                        </div>
+                      <CardContent className="h-80">
+                        <ChannelPerformance />
                       </CardContent>
                     </Card>
                   </div>
-
-                  {/* Main Chart */}
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle>Message Volume Over Time</CardTitle>
-                    </CardHeader>
-                    <CardContent className="h-80">
-                      <ChannelPerformance />
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-              <TabsContent value="channels" className="mt-0">
-                <ChannelPerformance />
-              </TabsContent>
-              <TabsContent value="campaigns" className="mt-0">
-                <CampaignStats />
-              </TabsContent>
+                </TabsContent>
+                <TabsContent value="channels" className="mt-6">
+                  <ChannelPerformance />
+                </TabsContent>
+                <TabsContent value="campaigns" className="mt-6">
+                  <CampaignStats />
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </div>

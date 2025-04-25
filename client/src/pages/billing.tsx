@@ -30,6 +30,10 @@ import {
   PiggyBank,
   BarChart3,
   RefreshCw,
+  MessageSquare,
+  Phone,
+  MessageCircle,
+  MessageSquareDashed,
 } from "lucide-react";
 import { TransactionList } from "@/components/billing/transaction-list";
 import { TopupForm } from "@/components/billing/topup-form";
@@ -178,76 +182,72 @@ export default function Billing() {
           {/* Main Content Tabs */}
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle>Billing Management</CardTitle>
-                  <CardDescription>
-                    View transaction history and manage your balance
-                  </CardDescription>
-                </div>
-                <Tabs
-                  defaultValue="transactions"
-                  value={activeTab}
-                  onValueChange={setActiveTab}
-                  className="w-[400px]"
-                >
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="transactions">Transactions</TabsTrigger>
-                    <TabsTrigger value="rates">Channel Rates</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              </div>
+              <CardTitle>Billing Management</CardTitle>
+              <CardDescription>
+                View transaction history and manage your balance
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <TabsContent value="transactions" className="mt-0">
-                <TransactionList 
-                  transactions={transactions || []}
-                  isLoading={isLoadingTransactions}
-                />
-              </TabsContent>
-              <TabsContent value="rates" className="mt-0">
-                <div className="rounded-md border">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Channel</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Base Rate</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Your Rate</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Currency</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {ratesData.map((rate, index) => (
-                        <tr key={index}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              {rate.channel === "SMS" && <MessageSquare className="h-5 w-5 text-blue-500 mr-2" />}
-                              {rate.channel === "VOIP" && <Phone className="h-5 w-5 text-green-500 mr-2" />}
-                              {rate.channel === "WhatsApp" && <MessageCircle className="h-5 w-5 text-indigo-500 mr-2" />}
-                              {rate.channel === "RCS" && <MessageSquareDashed className="h-5 w-5 text-purple-500 mr-2" />}
-                              <span>{rate.channel}</span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {rate.rate.toFixed(4)} per message
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="text-green-600 font-medium">{(rate.rate * 0.9).toFixed(4)}</span>
-                            {' '}
-                            <span className="text-xs text-gray-500">(10% discount)</span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {rate.currency || "USD"}
-                          </td>
+              <Tabs
+                defaultValue="transactions"
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="transactions">Transactions</TabsTrigger>
+                  <TabsTrigger value="rates">Channel Rates</TabsTrigger>
+                </TabsList>
+                <TabsContent value="transactions" className="mt-6">
+                  <TransactionList 
+                    transactions={transactions || []}
+                    isLoading={isLoadingTransactions}
+                  />
+                </TabsContent>
+                <TabsContent value="rates" className="mt-6">
+                  <div className="rounded-md border">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Channel</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Base Rate</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Your Rate</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Currency</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                <div className="mt-4 text-sm text-gray-500">
-                  <p>* Rates may vary based on destination country and volume. Contact support for custom pricing.</p>
-                </div>
-              </TabsContent>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {ratesData.map((rate, index) => (
+                          <tr key={index}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                {rate.channel === "SMS" && <MessageSquare className="h-5 w-5 text-blue-500 mr-2" />}
+                                {rate.channel === "VOIP" && <Phone className="h-5 w-5 text-green-500 mr-2" />}
+                                {rate.channel === "WhatsApp" && <MessageCircle className="h-5 w-5 text-indigo-500 mr-2" />}
+                                {rate.channel === "RCS" && <MessageSquareDashed className="h-5 w-5 text-purple-500 mr-2" />}
+                                <span>{rate.channel}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {rate.rate.toFixed(4)} per message
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="text-green-600 font-medium">{(rate.rate * 0.9).toFixed(4)}</span>
+                              {' '}
+                              <span className="text-xs text-gray-500">(10% discount)</span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {rate.currency || "USD"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="mt-4 text-sm text-gray-500">
+                    <p>* Rates may vary based on destination country and volume. Contact support for custom pricing.</p>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </div>
