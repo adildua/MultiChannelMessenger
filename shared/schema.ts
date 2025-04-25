@@ -37,7 +37,8 @@ export const tenants = pgTable("tenants", {
   address: text("address"),
   levelId: integer("level_id").references(() => tenantLevels.id).notNull(),
   parentId: integer("parent_id").references(() => tenants.id),
-  balance: decimal("balance", { precision: 10, scale: 2 }).notNull().default("0"),
+  // Changed from decimal to text to fix type conversion issues in API
+  balance: text("balance").notNull().default("0"),
   currencyCode: text("currency_code").notNull().default("USD"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow().notNull(),
