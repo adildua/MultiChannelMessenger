@@ -167,6 +167,17 @@ export default function Settings() {
       // This would be sent to the API in a real application
       // await apiRequest('PUT', '/api/user/appearance', data);
       
+      // Update theme if using ThemeProvider
+      if (data.theme && window) {
+        const themeProviderElement = document.documentElement;
+        themeProviderElement.classList.remove("light", "dark");
+        themeProviderElement.classList.add(data.theme === "system" 
+          ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+          : data.theme
+        );
+        localStorage.setItem("ui-theme", data.theme);
+      }
+      
       toast({
         title: "Appearance settings updated",
         description: "Your appearance preferences have been updated successfully.",

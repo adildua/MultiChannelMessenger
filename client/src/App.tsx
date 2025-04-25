@@ -17,6 +17,7 @@ import Checkout from "@/pages/checkout";
 import Analytics from "@/pages/analytics";
 import Settings from "@/pages/settings";
 import AppLayout from "@/components/layouts/app-layout";
+import { ThemeProvider } from "@/components/theme-provider";
 
 function Router() {
   return (
@@ -98,8 +99,10 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
+      <ThemeProvider defaultTheme="light">
+        <Router />
+        <Toaster />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
