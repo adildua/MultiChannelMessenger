@@ -36,7 +36,7 @@ export function BalanceWidget({ className, balance: initialBalance, currency = "
   const isLowBalance = (balance || 0) < 20;
 
   return (
-    <div className={cn("p-4 border rounded-lg bg-white shadow-sm", className)}>
+    <div className={cn("p-4 border rounded-lg bg-background shadow-sm", className)}>
       <div className="flex items-center gap-3">
         <div className={cn(
           "p-2 rounded-full",
@@ -48,16 +48,16 @@ export function BalanceWidget({ className, balance: initialBalance, currency = "
           )} />
         </div>
         <div>
-          <p className="text-sm text-slate-500">Current Balance</p>
+          <p className="text-sm text-muted-foreground">Current Balance</p>
           <p className="text-2xl font-semibold">{isLoading ? "Loading..." : formattedBalance}</p>
         </div>
       </div>
       
       <div className="mt-4 flex justify-between">
-        <Link href="/billing" className="text-sm text-blue-500 hover:text-blue-700">
+        <Link href="/billing" className="text-sm text-primary hover:text-primary/80">
           View Transactions
         </Link>
-        <Link href="/checkout" className="text-sm text-blue-500 hover:text-blue-700">
+        <Link href="/checkout" className="text-sm text-primary hover:text-primary/80">
           Top Up
         </Link>
       </div>
