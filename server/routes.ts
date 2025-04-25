@@ -297,9 +297,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post(`${apiPrefix}/contacts`, async (req, res) => {
     try {
-      // Validate the request data
-      const contactData = await storage.validateContactData(req.body);
-      
       // Get the tenant ID for the current user (or default user for development)
       const userId = getUserId(req);
       const userTenant = await storage.getUserPrimaryTenant(userId);
@@ -307,14 +304,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "No tenant found for user" });
       }
       
-      // Add tenant ID to contact data
-      const contactWithTenant = {
-        ...contactData,
+      // Add tenant ID to contact data before validation
+      const contactDataWithTenant = {
+        ...req.body,
         tenantId: userTenant.id
       };
       
+      // Validate the request data with tenant ID
+      const validatedContactData = await storage.validateContactData(contactDataWithTenant);
+      
       // Insert the contact
-      const newContact = await storage.insertContact(contactWithTenant);
+      const newContact = await storage.insertContact(validatedContactData);
       
       return res.status(201).json(newContact);
     } catch (error) {
@@ -365,9 +365,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid contact ID" });
       }
       
-      // Validate the request data
-      const contactData = await storage.validateContactData(req.body);
-      
       // Get the tenant ID for the current user
       const userId = getUserId(req);
       const userTenant = await storage.getUserPrimaryTenant(userId);
@@ -387,8 +384,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Contact not found" });
       }
       
+      // Add tenant ID to request data before validation
+      const contactDataWithTenant = {
+        ...req.body,
+        tenantId: userTenant.id
+      };
+      
+      // Validate the contact data with tenant ID
+      const validatedContactData = await storage.validateContactData(contactDataWithTenant);
+      
       // Update the contact
-      const updatedContact = await storage.updateContact(contactId, contactData);
+      const updatedContact = await storage.updateContact(contactId, validatedContactData);
       
       return res.json(updatedContact);
     } catch (error) {
@@ -482,9 +488,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post(`${apiPrefix}/templates`, async (req, res) => {
     try {
-      // Validate the request data
-      const templateData = await storage.validateTemplateData(req.body);
-      
       // Get the tenant ID for the current user (or default user for development)
       const userId = getUserId(req);
       const userTenant = await storage.getUserPrimaryTenant(userId);
@@ -492,14 +495,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "No tenant found for user" });
       }
       
-      // Add tenant ID to template data
-      const templateWithTenant = {
-        ...templateData,
+      // Add tenant ID to request data before validation
+      const templateDataWithTenant = {
+        ...req.body,
         tenantId: userTenant.id
       };
       
+      // Validate the template data with tenant ID
+      const validatedTemplateData = await storage.validateTemplateData(templateDataWithTenant);
+      
       // Insert the template
-      const newTemplate = await storage.insertTemplate(templateWithTenant);
+      const newTemplate = await storage.insertTemplate(validatedTemplateData);
       
       return res.status(201).json(newTemplate);
     } catch (error) {
@@ -550,9 +556,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid template ID" });
       }
       
-      // Validate the request data
-      const templateData = await storage.validateTemplateData(req.body);
-      
       // Get the tenant ID for the current user
       const userId = getUserId(req);
       const userTenant = await storage.getUserPrimaryTenant(userId);
@@ -572,8 +575,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Template not found" });
       }
       
+      // Add tenant ID to request data before validation
+      const templateDataWithTenant = {
+        ...req.body,
+        tenantId: userTenant.id
+      };
+      
+      // Validate the template data with tenant ID
+      const validatedTemplateData = await storage.validateTemplateData(templateDataWithTenant);
+      
       // Update the template
-      const updatedTemplate = await storage.updateTemplate(templateId, templateData);
+      const updatedTemplate = await storage.updateTemplate(templateId, validatedTemplateData);
       
       return res.json(updatedTemplate);
     } catch (error) {
@@ -669,9 +681,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post(`${apiPrefix}/flows`, async (req, res) => {
     try {
-      // Validate the request data
-      const flowData = await storage.validateFlowData(req.body);
-      
       // Get the tenant ID for the current user (or default user for development)
       const userId = getUserId(req);
       const userTenant = await storage.getUserPrimaryTenant(userId);
@@ -679,14 +688,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "No tenant found for user" });
       }
       
-      // Add tenant ID to flow data
-      const flowWithTenant = {
-        ...flowData,
+      // Add tenant ID to request data before validation
+      const flowDataWithTenant = {
+        ...req.body,
         tenantId: userTenant.id
       };
       
+      // Validate the flow data with tenant ID
+      const validatedFlowData = await storage.validateFlowData(flowDataWithTenant);
+      
       // Insert the flow
-      const newFlow = await storage.insertFlow(flowWithTenant);
+      const newFlow = await storage.insertFlow(validatedFlowData);
       
       return res.status(201).json(newFlow);
     } catch (error) {
@@ -704,9 +716,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isNaN(flowId)) {
         return res.status(400).json({ message: "Invalid flow ID" });
       }
-      
-      // Validate the request data
-      const flowData = await storage.validateFlowData(req.body);
       
       // Get the tenant ID for the current user (or default user for development)
       const userId = getUserId(req);
@@ -727,8 +736,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Flow not found" });
       }
       
+      // Add tenant ID to request data before validation
+      const flowDataWithTenant = {
+        ...req.body,
+        tenantId: userTenant.id
+      };
+      
+      // Validate the flow data with tenant ID
+      const validatedFlowData = await storage.validateFlowData(flowDataWithTenant);
+      
       // Update the flow
-      const updatedFlow = await storage.updateFlow(flowId, flowData);
+      const updatedFlow = await storage.updateFlow(flowId, validatedFlowData);
       
       return res.json(updatedFlow);
     } catch (error) {
@@ -792,9 +810,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post(`${apiPrefix}/campaigns`, async (req, res) => {
     try {
-      // Validate the request data
-      const campaignData = await storage.validateCampaignData(req.body);
-      
       // Get the tenant ID for the current user (or default user for development)
       const userId = getUserId(req);
       const userTenant = await storage.getUserPrimaryTenant(userId);
@@ -802,14 +817,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "No tenant found for user" });
       }
       
-      // Add tenant ID to campaign data
-      const campaignWithTenant = {
-        ...campaignData,
+      // Add tenant ID to request data before validation
+      const campaignDataWithTenant = {
+        ...req.body,
         tenantId: userTenant.id
       };
       
+      // Validate the campaign data with tenant ID
+      const validatedCampaignData = await storage.validateCampaignData(campaignDataWithTenant);
+      
       // Insert the campaign
-      const newCampaign = await storage.insertCampaign(campaignWithTenant);
+      const newCampaign = await storage.insertCampaign(validatedCampaignData);
       
       return res.status(201).json(newCampaign);
     } catch (error) {
