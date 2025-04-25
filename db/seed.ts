@@ -1,5 +1,6 @@
 import { db } from "./index";
 import * as schema from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 async function seed() {
   try {
@@ -75,7 +76,7 @@ async function seed() {
 
     // Check if admin user exists
     const existingAdmin = await db.query.users.findFirst({
-      where: schema.eq(schema.users.username, "admin")
+      where: eq(schema.users.username, "admin")
     });
 
     if (!existingAdmin) {
@@ -90,7 +91,7 @@ async function seed() {
 
       // Create a main tenant if it doesn't exist
       const level1 = await db.query.tenantLevels.findFirst({
-        where: schema.eq(schema.tenantLevels.name, "Enterprise")
+        where: eq(schema.tenantLevels.name, "Enterprise")
       });
 
       if (!level1) {

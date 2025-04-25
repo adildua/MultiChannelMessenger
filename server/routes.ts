@@ -1,4 +1,4 @@
-import type { Express, Request } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "@db";
@@ -7,6 +7,7 @@ import { eq, and, gte, desc, asc, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { createInsertSchema } from "drizzle-zod";
 import Stripe from "stripe";
+import * as crypto from "crypto";
 
 // Helper function to safely get the user ID from the session or use a default
 // This is only for development until proper authentication is implemented
@@ -111,13 +112,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Contact routes
   app.get(`${apiPrefix}/contacts`, async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
     try {
-      // Get the tenant ID for the current user
-      const userTenant = await storage.getUserPrimaryTenant(req.session.userId);
+      // Get the tenant ID for the current user (or default user for development)
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
       if (!userTenant) {
         return res.status(404).json({ message: "No tenant found for user" });
       }
@@ -135,16 +133,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post(`${apiPrefix}/contacts`, async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
     try {
       // Validate the request data
       const contactData = await storage.validateContactData(req.body);
       
-      // Get the tenant ID for the current user
-      const userTenant = await storage.getUserPrimaryTenant(req.session.userId);
+      // Get the tenant ID for the current user (or default user for development)
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
       if (!userTenant) {
         return res.status(404).json({ message: "No tenant found for user" });
       }
