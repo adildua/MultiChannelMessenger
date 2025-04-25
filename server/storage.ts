@@ -153,10 +153,10 @@ export async function insertCampaign(data: z.infer<typeof schema.insertCampaignS
 
 // Tenant-related functions
 export async function validateTenantData(data: any) {
-  return schema.insertTenantSchema.parse(data);
+  return schema.validatedTenantSchema.parse(data);
 }
 
-export async function insertTenant(data: z.infer<typeof schema.insertTenantSchema> & { parentId?: number | null }) {
+export async function insertTenant(data: z.infer<typeof schema.validatedTenantSchema> & { parentId?: number | null }) {
   const [tenant] = await db.insert(schema.tenants).values(data).returning();
   return tenant;
 }

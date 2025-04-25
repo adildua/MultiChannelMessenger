@@ -30,9 +30,10 @@ async function main() {
     `);
     
     // Check if any tables exist
-    if (tableQuery.length > 0) {
+    const resultArray = tableQuery.rows || [];
+    if (resultArray.length > 0) {
       console.log('Found existing tables. Dropping them...');
-      for (const row of tableQuery) {
+      for (const row of resultArray) {
         const tableName = row.table_name;
         console.log(`Dropping table: ${tableName}`);
         await db.execute(sql`DROP TABLE IF EXISTS "${tableName}" CASCADE;`);

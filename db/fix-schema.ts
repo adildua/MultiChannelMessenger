@@ -50,8 +50,10 @@ async function main() {
       WHERE table_name = 'tenants' AND column_name = 'balance';
     `);
 
-    if (columnCheck.length > 0) {
-      const dataType = columnCheck[0].data_type;
+    const resultArray = columnCheck.rows || [];
+    if (resultArray.length > 0) {
+      const row = resultArray[0];
+      const dataType = row.data_type;
       console.log(`Current balance column type: ${dataType}`);
       
       if (dataType !== 'character varying' && dataType !== 'text') {

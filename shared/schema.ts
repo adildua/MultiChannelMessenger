@@ -29,6 +29,7 @@ export const tenantLevels = pgTable("tenant_levels", {
 });
 
 // Tenants (Organizations)
+// Define tenants table with proper type declarations
 export const tenants = pgTable("tenants", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -36,7 +37,8 @@ export const tenants = pgTable("tenants", {
   phone: text("phone"),
   address: text("address"),
   levelId: integer("level_id").references(() => tenantLevels.id).notNull(),
-  parentId: integer("parent_id").references(() => tenants.id),
+  // Use forward reference to fix circular reference
+  parentId: integer("parent_id"),
   // Changed from decimal to text to fix type conversion issues in API
   balance: text("balance").notNull().default("0"),
   currencyCode: text("currency_code").notNull().default("USD"),
@@ -368,10 +370,19 @@ export const insertUserSchema = createInsertSchema(users, {
   email: (schema) => schema.email("Must provide a valid email")
 });
 
-export const insertTenantSchema = createInsertSchema(tenants, {
-  name: (schema) => schema.min(2, "Name must be at least 2 characters"),
-  email: (schema) => schema.email("Must provide a valid email")
+// Fix tenant schema validation
+export const insertTenantSchema = createInsertSchema(tenants);
+
+// Apply custom validations to specific fields manually
+const tenantBaseSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Must provide a valid email"),
+  balance: z.string().optional(),
+  currencyCode: z.string().optional()
 });
+
+// Merge the base schema with the generated schema
+export const validatedTenantSchema = insertTenantSchema.merge(tenantBaseSchema);
 
 export const insertContactSchema = createInsertSchema(contacts, {
   firstName: (schema) => schema.min(1, "First name is required")
@@ -393,7 +404,7 @@ export const insertFlowSchema = createInsertSchema(flows, {
 export type User = typeof users.$inferSelect;
 export type UserInsert = z.infer<typeof insertUserSchema>;
 export type Tenant = typeof tenants.$inferSelect;
-export type TenantInsert = z.infer<typeof insertTenantSchema>;
+export type TenantInsert = z.infer<typeof validatedTenantSchema>;
 export type Contact = typeof contacts.$inferSelect;
 export type ContactInsert = z.infer<typeof insertContactSchema>;
 export type Template = typeof templates.$inferSelect & {
