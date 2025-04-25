@@ -321,30 +321,117 @@ export function ContactList() {
         </DialogContent>
       </Dialog>
       
-      {/* Import Dialog - Simplified for now */}
+      {/* Import Dialog */}
       <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>Import Contacts</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="border-2 border-dashed rounded-md p-6 text-center">
-              <FileUp className="mx-auto h-8 w-8 text-gray-400" />
-              <p className="mt-2 text-sm text-gray-500">
-                Drag and drop a CSV file, or click to browse
-              </p>
-              <div className="mt-4">
-                <Input type="file" className="hidden" id="file-upload" />
-                <Button asChild>
-                  <label htmlFor="file-upload">Choose File</label>
-                </Button>
+            {importStatus === 'idle' && (
+              <>
+                <div className="border-2 border-dashed rounded-md p-6 text-center">
+                  <FileUp className="mx-auto h-8 w-8 text-gray-400" />
+                  <p className="mt-2 text-sm text-gray-500">
+                    {importFile ? importFile.name : "Drag and drop a CSV file, or click to browse"}
+                  </p>
+                  <div className="mt-4">
+                    <Input 
+                      type="file" 
+                      className="hidden" 
+                      id="file-upload" 
+                      accept=".csv"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                    />
+                    <Button asChild>
+                      <label htmlFor="file-upload">Choose File</label>
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">
+                    Your CSV file should include these headers:
+                  </p>
+                  <div className="bg-gray-50 p-2 rounded text-xs font-mono">
+                    First Name,Last Name,Email,Phone,WhatsApp,Status
+                  </div>
+                </div>
+              </>
+            )}
+
+            {importStatus === 'loading' && (
+              <div className="space-y-4 py-6">
+                <p className="text-center font-medium">Importing contacts...</p>
+                <Progress value={importProgress} className="w-full" />
+                <p className="text-center text-sm text-gray-500">
+                  {importProgress < 30 && "Preparing file..."}
+                  {importProgress >= 30 && importProgress < 90 && "Processing contacts..."}
+                  {importProgress >= 90 && "Finalizing import..."}
+                </p>
               </div>
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setShowImportDialog(false)}>
-                Cancel
-              </Button>
-              <Button>Import</Button>
+            )}
+
+            {importStatus === 'success' && importResults && (
+              <div className="space-y-4">
+                <Alert>
+                  <CheckCircle2 className="h-4 w-4" />
+                  <AlertTitle>Import Successful</AlertTitle>
+                  <AlertDescription>
+                    Successfully imported {importResults.imported} contacts.
+                  </AlertDescription>
+                </Alert>
+
+                {importResults.errors && importResults.errors.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="font-medium text-amber-600">
+                      The following issues were encountered:
+                    </p>
+                    <div className="max-h-[200px] overflow-y-auto border rounded p-2 bg-gray-50">
+                      <ul className="list-disc list-inside space-y-1">
+                        {importResults.errors.map((error, index) => (
+                          <li key={index} className="text-sm text-gray-700">{error}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {importStatus === 'error' && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Import Failed</AlertTitle>
+                <AlertDescription>
+                  An error occurred while importing contacts. Please check your file format and try again.
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <div className="flex justify-end space-x-2 pt-2">
+              {importStatus === 'idle' && (
+                <>
+                  <Button variant="outline" onClick={() => setShowImportDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={processImport} disabled={!importFile}>
+                    Import
+                  </Button>
+                </>
+              )}
+              
+              {(importStatus === 'success' || importStatus === 'error') && (
+                <Button onClick={() => setShowImportDialog(false)}>
+                  Close
+                </Button>
+              )}
+              
+              {importStatus === 'loading' && (
+                <Button disabled>
+                  Importing...
+                </Button>
+              )}
             </div>
           </div>
         </DialogContent>
