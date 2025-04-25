@@ -136,7 +136,15 @@ export default function Templates() {
     <div className="py-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-gray-900">Templates</h1>
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">Templates</h1>
+            <div className="flex mt-2 space-x-2">
+              <a href="/whatsapp-templates" className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center">
+                <MessageCircle className="h-4 w-4 mr-1" />
+                WhatsApp Templates
+              </a>
+            </div>
+          </div>
           <Button onClick={handleCreateTemplate} className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
             New Template
