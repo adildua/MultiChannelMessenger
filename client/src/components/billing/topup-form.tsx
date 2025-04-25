@@ -1,121 +1,105 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { CreditCard } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 interface TopupFormProps {
   onSuccess?: () => void;
 }
 
 export function TopupForm({ onSuccess }: TopupFormProps) {
-  const [amount, setAmount] = useState("50");
-  const [isLoading, setIsLoading] = useState(false);
+  const [, navigate] = useLocation();
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
+  const [amount, setAmount] = useState<number>(50);
+  
+  const quickAmounts = [10, 50, 100, 500];
 
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Only allow numbers and decimal points
-    const value = e.target.value.replace(/[^0-9.]/g, "");
-    setAmount(value);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    // Validate amount
-    const numAmount = parseFloat(amount);
-    if (isNaN(numAmount) || numAmount <= 0) {
-      toast({
-        title: "Invalid amount",
-        description: "Please enter a valid positive amount",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      // Instead of processing payment here, redirect to checkout page
-      setLocation(`/checkout?amount=${numAmount}`);
+  const topupMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("POST", "/api/create-payment-intent", { amount });
+    },
+    onSuccess: (response) => {
+      navigate("/checkout");
       if (onSuccess) {
         onSuccess();
       }
-    } catch (error) {
-      console.error("Error redirecting to checkout:", error);
+    },
+    onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to redirect to checkout. Please try again.",
+        description: "Failed to create payment. Please try again.",
         variant: "destructive",
       });
-      setIsLoading(false);
     }
-  };
+  });
 
-  const handleQuickAmount = (quickAmount: number) => {
-    setAmount(quickAmount.toString());
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (amount <= 0) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter an amount greater than 0.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    topupMutation.mutate();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-      <div className="space-y-2">
-        <Label htmlFor="amount">Amount</Label>
-        <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
-          <Input
-            id="amount"
-            value={amount}
-            onChange={handleAmountChange}
-            className="pl-8"
-            placeholder="Enter amount"
-          />
+    <div className="p-6 border rounded-lg bg-white shadow-sm">
+      <h3 className="text-lg font-semibold mb-4">Top Up Your Account</h3>
+      
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label htmlFor="amount" className="block text-sm font-medium text-slate-700 mb-1">
+            Amount
+          </label>
+          <div className="relative">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">$</span>
+            <input
+              id="amount"
+              type="number"
+              className="block w-full pl-8 pr-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              min="1"
+              step="0.01"
+              value={amount}
+              onChange={(e) => setAmount(parseFloat(e.target.value))}
+            />
+          </div>
         </div>
-      </div>
-
-      <div className="grid grid-cols-3 gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => handleQuickAmount(10)}
-          className="text-center"
+        
+        <div className="mb-5">
+          <p className="text-sm font-medium text-slate-700 mb-2">Quick Amounts</p>
+          <div className="flex flex-wrap gap-2">
+            {quickAmounts.map((quickAmount) => (
+              <button
+                key={quickAmount}
+                type="button"
+                className={`px-4 py-2 text-sm border rounded-md transition-colors
+                  ${amount === quickAmount 
+                    ? 'bg-blue-100 border-blue-500 text-blue-700' 
+                    : 'border-slate-300 hover:bg-slate-50'
+                  }`}
+                onClick={() => setAmount(quickAmount)}
+              >
+                ${quickAmount}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        <Button 
+          type="submit" 
+          className="w-full"
+          disabled={topupMutation.isPending}
         >
-          $10
+          {topupMutation.isPending ? "Processing..." : "Proceed to Payment"}
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => handleQuickAmount(50)}
-          className="text-center"
-        >
-          $50
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => handleQuickAmount(100)}
-          className="text-center"
-        >
-          $100
-        </Button>
-      </div>
-
-      <Button
-        type="submit"
-        className="w-full mt-6"
-        disabled={isLoading || !amount || parseFloat(amount) <= 0}
-      >
-        {isLoading ? (
-          "Processing..."
-        ) : (
-          <>
-            <CreditCard className="h-4 w-4 mr-2" />
-            Proceed to Payment
-          </>
-        )}
-      </Button>
-    </form>
+      </form>
+    </div>
   );
 }

@@ -1,30 +1,28 @@
 import { useState } from "react";
-import { Transaction } from "@shared/schema";
+import { ArrowUpRight, ArrowDownLeft, Filter } from "lucide-react";
 import {
   Table,
-  TableBody,
-  TableCell,
-  TableHead,
   TableHeader,
+  TableBody,
   TableRow,
+  TableHead,
+  TableCell
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-  ArrowDownCircle,
-  ArrowUpCircle,
-  Calendar,
-  CreditCard,
-  Search,
-  ArrowUpDown,
-} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+// Define a Transaction interface based on our app's needs
+interface Transaction {
+  id: number;
+  type: string;
+  description: string | null;
+  amount: number;
+  currency: string;
+  status: string;
+  createdAt: string | Date;
+  tenantId: number;
+  metadata?: any;
+}
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -32,170 +30,127 @@ interface TransactionListProps {
 }
 
 export function TransactionList({ transactions, isLoading }: TransactionListProps) {
-  const [filter, setFilter] = useState("all");
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<"newest" | "oldest" | "amount-high" | "amount-low">("newest");
-
-  // Filter transactions based on type and search
-  const filteredTransactions = transactions.filter((transaction) => {
-    const matchesFilter = filter === "all" || transaction.type === filter;
-    const matchesSearch = search === "" || 
-      (transaction.description && transaction.description.toLowerCase().includes(search.toLowerCase())) ||
-      transaction.reference?.toLowerCase().includes(search.toLowerCase());
-    
-    return matchesFilter && matchesSearch;
+  const [filter, setFilter] = useState<string>("all");
+  
+  // Filter transactions based on the selected filter
+  const filteredTransactions = transactions.filter(transaction => {
+    if (filter === "all") return true;
+    return transaction.type === filter;
   });
 
-  // Sort transactions
-  const sortedTransactions = [...filteredTransactions].sort((a, b) => {
-    if (sort === "newest") {
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    } else if (sort === "oldest") {
-      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-    } else if (sort === "amount-high") {
-      return parseFloat(b.amount as string) - parseFloat(a.amount as string);
-    } else if (sort === "amount-low") {
-      return parseFloat(a.amount as string) - parseFloat(b.amount as string);
-    }
-    return 0;
-  });
+  // Function to format date
+  const formatDate = (dateString: string | Date) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  };
+
+  // Function to format amount with currency
+  const formatAmount = (amount: number, currency: string) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency || 'USD',
+    }).format(amount);
+  };
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:justify-between space-y-3 sm:space-y-0 sm:space-x-4">
-        <div className="flex-1 relative">
-          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Search transactions..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-        <div className="flex space-x-2">
-          <Select value={filter} onValueChange={setFilter}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Filter" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="topup">Top Ups</SelectItem>
-              <SelectItem value="charge">Charges</SelectItem>
-              <SelectItem value="refund">Refunds</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Select value={sort} onValueChange={(val) => setSort(val as any)}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Sort" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest first</SelectItem>
-              <SelectItem value="oldest">Oldest first</SelectItem>
-              <SelectItem value="amount-high">Amount (high-low)</SelectItem>
-              <SelectItem value="amount-low">Amount (low-high)</SelectItem>
-            </SelectContent>
-          </Select>
+    <div className="bg-white border rounded-lg shadow-sm">
+      <div className="p-4 border-b flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Transaction History</h3>
+        
+        <div className="flex gap-2">
+          <Button 
+            variant={filter === "all" ? "default" : "outline"} 
+            size="sm"
+            onClick={() => setFilter("all")}
+          >
+            All
+          </Button>
+          <Button 
+            variant={filter === "payment" ? "default" : "outline"} 
+            size="sm"
+            onClick={() => setFilter("payment")}
+          >
+            Payments
+          </Button>
+          <Button 
+            variant={filter === "charge" ? "default" : "outline"} 
+            size="sm"
+            onClick={() => setFilter("charge")}
+          >
+            Charges
+          </Button>
         </div>
       </div>
-
+      
       {isLoading ? (
-        <div className="flex justify-center items-center py-8">
-          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+        <div className="flex justify-center items-center p-8">
+          <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
         </div>
-      ) : sortedTransactions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-8 text-center">
-          <div className="rounded-full bg-gray-100 p-3 mb-2">
-            <CreditCard className="h-6 w-6 text-gray-400" />
-          </div>
-          <h3 className="text-lg font-medium">No transactions found</h3>
-          <p className="text-sm text-gray-500 mt-1">
-            {search || filter !== "all" 
-              ? "Try changing your search or filter criteria" 
-              : "Your transaction history will appear here"}
-          </p>
+      ) : filteredTransactions.length === 0 ? (
+        <div className="p-8 text-center text-slate-500">
+          No transactions found.
         </div>
       ) : (
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12"></TableHead>
-                <TableHead className="w-[180px]">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Type</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
+              <TableHead className="text-right">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredTransactions.map((transaction) => (
+              <TableRow key={transaction.id}>
+                <TableCell>
                   <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-1" />
-                    Date
-                  </div>
-                </TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Reference</TableHead>
-                <TableHead className="text-right">
-                  <div className="flex items-center justify-end">
-                    <ArrowUpDown className="h-4 w-4 mr-1" />
-                    Amount
-                  </div>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedTransactions.map((transaction) => (
-                <TableRow key={transaction.id}>
-                  <TableCell>
-                    {transaction.type === "topup" ? (
-                      <ArrowUpCircle className="h-5 w-5 text-green-500" />
-                    ) : transaction.type === "refund" ? (
-                      <ArrowUpCircle className="h-5 w-5 text-blue-500" />
-                    ) : (
-                      <ArrowDownCircle className="h-5 w-5 text-red-500" />
-                    )}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {new Date(transaction.createdAt).toLocaleString(undefined, {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-col">
-                      <span>{transaction.description || "Transaction"}</span>
-                      <Badge 
-                        variant={
-                          transaction.type === "topup" 
-                            ? "success" 
-                            : transaction.type === "refund" 
-                            ? "secondary" 
-                            : "destructive"
-                        }
-                        className="w-fit capitalize text-xs mt-1"
-                      >
-                        {transaction.type}
-                      </Badge>
+                    <div className={cn(
+                      "p-2 rounded-full mr-2",
+                      transaction.type === "payment" ? "bg-green-100" : "bg-blue-100"
+                    )}>
+                      {transaction.type === "payment" ? (
+                        <ArrowUpRight className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <ArrowDownLeft className="h-4 w-4 text-blue-600" />
+                      )}
                     </div>
-                  </TableCell>
-                  <TableCell className="text-gray-500">
-                    {transaction.reference || "-"}
-                  </TableCell>
-                  <TableCell className="text-right whitespace-nowrap font-medium">
-                    <span className={
-                      transaction.type === "topup" || transaction.type === "refund"
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }>
-                      {transaction.type === "topup" || transaction.type === "refund" ? "+" : "-"}
-                      {new Intl.NumberFormat("en-US", {
-                        style: "currency",
-                        currency: transaction.currency || "USD",
-                      }).format(parseFloat(transaction.amount as string))}
-                    </span>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+                    <span className="capitalize">{transaction.type}</span>
+                  </div>
+                </TableCell>
+                <TableCell>{formatDate(transaction.createdAt)}</TableCell>
+                <TableCell>{transaction.description || (
+                  transaction.type === "payment" 
+                    ? "Account Top-up" 
+                    : "Channel Usage"
+                )}</TableCell>
+                <TableCell className="text-right">
+                  <span className={transaction.type === "payment" ? "text-green-600" : ""}>
+                    {transaction.type === "payment" ? "+" : ""}
+                    {formatAmount(transaction.amount, transaction.currency)}
+                  </span>
+                </TableCell>
+                <TableCell className="text-right">
+                  <span className={cn(
+                    "px-2 py-1 rounded-full text-xs font-medium",
+                    transaction.status === "completed" ? "bg-green-100 text-green-800" :
+                    transaction.status === "pending" ? "bg-yellow-100 text-yellow-800" :
+                    "bg-red-100 text-red-800"
+                  )}>
+                    {transaction.status}
+                  </span>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       )}
     </div>
   );
