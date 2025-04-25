@@ -8,6 +8,7 @@ import { z } from "zod";
 import { createInsertSchema } from "drizzle-zod";
 import Stripe from "stripe";
 import * as crypto from "crypto";
+import { aiService } from "./ai-service";
 
 // Helper function to safely get the user ID from the session or use a default
 // This is only for development until proper authentication is implemented
