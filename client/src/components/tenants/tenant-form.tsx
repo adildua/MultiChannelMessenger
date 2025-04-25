@@ -33,7 +33,11 @@ const formSchema = z.object({
   phone: z.string().optional(),
   address: z.string().optional(),
   levelId: z.coerce.number().min(1, "Tenant level is required"),
-  balance: z.coerce.number().nonnegative("Balance must be 0 or positive").default(0),
+  // Using string instead of number for balance to match backend schema
+  balance: z.union([
+    z.string().refine(val => !isNaN(parseFloat(val)) && parseFloat(val) >= 0, "Balance must be 0 or positive"),
+    z.number().nonnegative("Balance must be 0 or positive").transform(val => val.toString())
+  ]).default("0"),
   currencyCode: z.string().min(3, "Currency code is required").default("USD"),
   isActive: z.boolean().default(true),
 });
@@ -51,7 +55,10 @@ export function TenantForm({ tenant, onSuccess }: TenantFormProps) {
     queryKey: ['/api/tenant-levels'],
   });
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  // Define type for form schema
+  type FormSchema = z.infer<typeof formSchema>;
+
+  const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: tenant?.name || "",
@@ -59,13 +66,14 @@ export function TenantForm({ tenant, onSuccess }: TenantFormProps) {
       phone: tenant?.phone || "",
       address: tenant?.address || "",
       levelId: tenant?.levelId || 0,
-      balance: tenant?.balance || 0,
+      // Handle balance as string type
+      balance: tenant?.balance !== undefined ? String(tenant.balance) : "0",
       currencyCode: tenant?.currencyCode || "USD",
       isActive: tenant?.isActive !== undefined ? tenant.isActive : true,
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: FormSchema) => {
     setIsSubmitting(true);
     try {
       if (tenant?.id) {
@@ -202,7 +210,19 @@ export function TenantForm({ tenant, onSuccess }: TenantFormProps) {
               <FormItem>
                 <FormLabel>Initial Balance</FormLabel>
                 <FormControl>
-                  <Input type="number" min="0" step="0.01" {...field} />
+                  <Input 
+                    type="number" 
+                    min="0" 
+                    step="0.01" 
+                    value={field.value}
+                    onChange={e => {
+                      // Convert to string to match the expected type
+                      field.onChange(e.target.value.toString());
+                    }}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                    ref={field.ref}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

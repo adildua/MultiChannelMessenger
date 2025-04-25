@@ -1402,7 +1402,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Record the payment in our database
       const transaction = await db.insert(transactions).values({
         tenantId: userTenant.id,
-        amount: parseFloat(amount),
+        amount: amount.toString(), // Use string for amount to match schema
         type: "payment",
         status: "completed",
         currency: userTenant.currencyCode || "USD",
