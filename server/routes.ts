@@ -1202,8 +1202,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post(`${apiPrefix}/tenants`, async (req, res) => {
     try {
+      // Convert balance to string if it's a number
+      const requestData = { ...req.body };
+      if (typeof requestData.balance === 'number') {
+        requestData.balance = requestData.balance.toString();
+      }
+      
       // Validate the request data
-      const tenantData = await storage.validateTenantData(req.body);
+      const tenantData = await storage.validateTenantData(requestData);
       
       // Get the tenant ID for the current user (or default user for development)
       const userId = getUserId(req);
