@@ -15,7 +15,8 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
-import { CustomNodeTypes } from './custom-node-types';
+// Add proper import for the node types
+import { CustomNodeTypes } from "@/components/flow-builder/custom-node-types";
 import type { BackgroundVariant } from 'reactflow';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -257,7 +258,8 @@ export function CustomFlowBuilder({ flowId, initialNodes = [], initialEdges = []
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="text-sm"
-            prefix={<Search className="h-4 w-4 text-gray-400" />}
+            // Remove prefix which is causing an issue
+            
           />
         </div>
         <div className="py-2">
@@ -331,7 +333,7 @@ export function CustomFlowBuilder({ flowId, initialNodes = [], initialEdges = []
               zoomable
               pannable
             />
-            <Background gap={16} color="#f1f5f9" variant="dots" />
+            <Background gap={16} color="#f1f5f9" />
           </ReactFlow>
         </div>
       </div>

@@ -64,8 +64,8 @@ export default function FlowBuilder() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 h-[calc(100%-60px)]">
           <CustomFlowBuilder 
             flowId={selectedFlow?.id} 
-            initialNodes={selectedFlow?.nodes || []}
-            initialEdges={selectedFlow?.edges || []}
+            initialNodes={selectedFlow?.nodes || [] as any}
+            initialEdges={selectedFlow?.edges || [] as any}
           />
         </div>
       </div>
