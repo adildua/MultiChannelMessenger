@@ -993,6 +993,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Error recording payment" });
     }
   });
+  
+  // AI Message Optimization API
+  app.post(`${apiPrefix}/optimize-message`, async (req, res) => {
+    try {
+      const { message, channel, audience, tone, goal } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ message: "Message content is required" });
+      }
+      
+      if (!channel) {
+        return res.status(400).json({ message: "Communication channel is required" });
+      }
+      
+      // Get the tenant ID for the current user (or default user for development)
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
+      if (!userTenant) {
+        return res.status(404).json({ message: "No tenant found for user" });
+      }
+      
+      // Call the AI service to optimize the message
+      const optimization = await aiService.optimizeMessage(message, {
+        channel,
+        audience,
+        tone,
+        goal
+      });
+      
+      return res.json(optimization);
+    } catch (error) {
+      console.error("Message optimization error:", error);
+      return res.status(500).json({ 
+        message: "Error optimizing message",
+        error: error.message
+      });
+    }
+  });
 
   const httpServer = createServer(app);
 

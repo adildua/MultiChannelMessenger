@@ -1,0 +1,1 @@
+export { MessageOptimizer } from './message-optimizer';

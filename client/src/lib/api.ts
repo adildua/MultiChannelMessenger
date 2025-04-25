@@ -267,6 +267,20 @@ export const apiIntegrationsApi = {
   }
 };
 
+// API client for AI message optimization
+export const aiApi = {
+  optimizeMessage: async (data: {
+    message: string; 
+    channel: string; 
+    audience?: string;
+    tone?: string;
+    goal?: string;
+  }) => {
+    const res = await apiRequest("POST", "/api/optimize-message", data);
+    return res.json();
+  }
+};
+
 // API client for user
 export const userApi = {
   getCurrentUser: async () => {
