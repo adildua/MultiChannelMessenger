@@ -1,7 +1,7 @@
-import { Conversation } from "@shared/schema";
 import { 
   MessageSquare, 
   MessageCircle, 
+  MessageCircleMore,
   Phone, 
   MessageSquareDashed,
   Clock,
@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 
 interface ConversationListProps {
-  conversations: Conversation[];
+  conversations: any[]; // Using any[] type to handle mock data
   isLoading: boolean;
   selectedId: number | null;
   onSelect: (id: number) => void;
@@ -28,7 +28,7 @@ export function ConversationList({ conversations, isLoading, selectedId, onSelec
       case 'voip':
         return <Phone className="h-5 w-5 text-green-500" />;
       case 'whatsapp':
-        return <MessageCircle className="h-5 w-5 text-indigo-500" />;
+        return <MessageCircleMore className="h-5 w-5 text-emerald-500" />;
       case 'rcs':
         return <MessageSquareDashed className="h-5 w-5 text-purple-500" />;
       default:

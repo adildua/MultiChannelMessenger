@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import { Conversation } from "@shared/schema";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +28,7 @@ import {
   MessageSquare,
   Phone,
   MessageCircle,
+  MessageCircleMore,
   MessageSquareDashed,
   ArrowLeft,
   MoreVertical,
@@ -40,7 +40,7 @@ import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 
 interface ConversationDetailProps {
-  conversation: Conversation;
+  conversation: any; // Using any type to handle mock data
   onBack: () => void;
 }
 

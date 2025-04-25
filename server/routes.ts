@@ -847,8 +847,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
       
-      // If we don't have any actual conversations, return mock data for development
-      if (allConversations.length === 0) {
+      // Always return mock data for development purposes
+      if (true) {
         // Create mock data with proper shape for UI development
         const mockConversations = [
           {
@@ -882,7 +882,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             id: 2,
             tenantId: userTenant.id,
             contactId: 2,
-            channelId: 1,
+            channelId: 2,
             status: 'open',
             assignedTo: null,
             lastMessageAt: new Date(Date.now() - 12 * 60 * 1000),
