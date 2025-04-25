@@ -127,7 +127,7 @@ export default function Templates() {
       template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       template.content.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesType = typeFilter === "" || template.type.toLowerCase() === typeFilter.toLowerCase();
+    const matchesType = typeFilter === "all" || typeFilter === "" || template.type.toLowerCase() === typeFilter.toLowerCase();
     
     return matchesSearch && matchesType;
   });
@@ -170,7 +170,7 @@ export default function Templates() {
                       <SelectValue placeholder="Filter by type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Types</SelectItem>
+                      <SelectItem value="all">All Types</SelectItem>
                       <SelectItem value="sms">SMS</SelectItem>
                       <SelectItem value="voip">VOIP</SelectItem>
                       <SelectItem value="whatsapp">WhatsApp</SelectItem>

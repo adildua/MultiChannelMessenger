@@ -233,7 +233,7 @@ export function CampaignForm({ campaign, onSuccess }: CampaignFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Template</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
+                <Select onValueChange={field.onChange} defaultValue={field.value?.toString() || "1"}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a template" />
@@ -264,7 +264,7 @@ export function CampaignForm({ campaign, onSuccess }: CampaignFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Flow</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value.toString()}>
+                <Select onValueChange={field.onChange} defaultValue={field.value?.toString() || "1"}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a flow" />
