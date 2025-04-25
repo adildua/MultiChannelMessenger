@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import {
   MessageSquare,
   Phone,
@@ -19,7 +19,7 @@ import TemplateEditor from "@/components/templates/template-editor";
 import TenantForm from "@/components/tenants/tenant-form";
 
 export default function Dashboard() {
-  const [, navigate] = useNavigate();
+  const [, navigate] = useLocation();
   const [showCampaignDialog, setShowCampaignDialog] = useState(false);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
   const [showTenantDialog, setShowTenantDialog] = useState(false);

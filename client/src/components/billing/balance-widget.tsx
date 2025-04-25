@@ -54,11 +54,11 @@ export function BalanceWidget({ className, balance: initialBalance, currency = "
       </div>
       
       <div className="mt-4 flex justify-between">
-        <Link href="/billing">
-          <a className="text-sm text-blue-500 hover:text-blue-700">View Transactions</a>
+        <Link href="/billing" className="text-sm text-blue-500 hover:text-blue-700">
+          View Transactions
         </Link>
-        <Link href="/checkout">
-          <a className="text-sm text-blue-500 hover:text-blue-700">Top Up</a>
+        <Link href="/checkout" className="text-sm text-blue-500 hover:text-blue-700">
+          Top Up
         </Link>
       </div>
     </div>
