@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Flow } from "@shared/schema";
-import { FlowBuilder as FlowBuilderComponent } from "@/components/flow-builder/flow-builder";
+import { CustomFlowBuilder } from "@/components/flow-builder/custom-flow-builder";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, ArrowLeftCircle } from "lucide-react";
@@ -62,7 +62,7 @@ export default function FlowBuilder() {
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 h-[calc(100%-60px)]">
-          <FlowBuilderComponent 
+          <CustomFlowBuilder 
             flowId={selectedFlow?.id} 
             initialNodes={selectedFlow?.nodes || []}
             initialEdges={selectedFlow?.edges || []}
