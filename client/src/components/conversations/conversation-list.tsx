@@ -62,44 +62,8 @@ export function ConversationList({ conversations, isLoading, selectedId, onSelec
     }
   };
 
-  // Mock conversations data for UI demonstration
-  const mockData = [
-    {
-      id: 1,
-      status: 'open',
-      channel: { code: 'whatsapp' },
-      contact: { firstName: 'John', lastName: 'Smith' },
-      lastMessageAt: new Date(Date.now() - 5 * 60 * 1000),
-      lastMessage: { content: 'I need help with my order #12345' }
-    },
-    {
-      id: 2,
-      status: 'open',
-      channel: { code: 'sms' },
-      contact: { firstName: 'Sarah', lastName: 'Johnson' },
-      lastMessageAt: new Date(Date.now() - 12 * 60 * 1000),
-      lastMessage: { content: 'When will my package arrive?' }
-    },
-    {
-      id: 3,
-      status: 'assigned',
-      channel: { code: 'rcs' },
-      contact: { firstName: 'Michael', lastName: 'Brown' },
-      lastMessageAt: new Date(Date.now() - 35 * 60 * 1000),
-      lastMessage: { content: "I'd like to change my subscription plan." }
-    },
-    {
-      id: 4,
-      status: 'closed',
-      channel: { code: 'voip' },
-      contact: { firstName: 'Emma', lastName: 'Davis' },
-      lastMessageAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-      lastMessage: { content: 'Thank you for your help!' }
-    }
-  ];
-
-  // Use mock data if no conversations are provided
-  const conversationsToShow = conversations.length > 0 ? conversations : mockData;
+  // Use conversations from props
+  const conversationsToShow = conversations;
 
   if (isLoading) {
     return (

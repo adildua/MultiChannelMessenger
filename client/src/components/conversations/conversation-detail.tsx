@@ -171,42 +171,6 @@ export function ConversationDetail({ conversation, onBack }: ConversationDetailP
     }
   };
 
-  // Mock messages for UI demonstration if no messages returned yet
-  const mockMessages = [
-    {
-      id: 1,
-      content: "Hello! I need help with my recent order #12345.",
-      direction: "inbound",
-      sentAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-    },
-    {
-      id: 2,
-      content: "Hi there! I'd be happy to help you with your order. Could you please provide more details about the issue you're experiencing?",
-      direction: "outbound",
-      sentAt: new Date(Date.now() - 28 * 60 * 1000).toISOString(),
-      sender: { name: "Alex Morgan" }
-    },
-    {
-      id: 3,
-      content: "I ordered a product last week, but it hasn't arrived yet. The tracking number doesn't show any updates for 3 days.",
-      direction: "inbound",
-      sentAt: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
-    },
-    {
-      id: 4,
-      content: "I understand your concern. Let me check the status of your order right away. This might take a few minutes.",
-      direction: "outbound",
-      sentAt: new Date(Date.now() - 22 * 60 * 1000).toISOString(),
-      sender: { name: "Alex Morgan" }
-    },
-    {
-      id: 5,
-      content: "Thank you, I'll wait.",
-      direction: "inbound",
-      sentAt: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
-    }
-  ];
-
   // Format time for messages
   const formatMessageTime = (timestamp: string) => {
     try {
@@ -216,8 +180,8 @@ export function ConversationDetail({ conversation, onBack }: ConversationDetailP
     }
   };
 
-  // Use mock messages if no messages available
-  const messagesToShow = messages && messages.length > 0 ? messages : mockMessages;
+  // Use messages from API or empty array if none available
+  const messagesToShow = messages || [];
 
   // Mock users for UI if none available
   const mockUsers = [

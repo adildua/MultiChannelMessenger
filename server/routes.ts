@@ -816,6 +816,285 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Conversation routes
+  app.get(`${apiPrefix}/conversations`, async (req, res) => {
+    try {
+      // Get the tenant ID for the current user (or default user for development)
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
+      if (!userTenant) {
+        return res.status(404).json({ message: "No tenant found for user" });
+      }
+      
+      // Get filter parameter (default to all)
+      const status = req.query.status as string || 'all';
+      
+      // Build where clause
+      let whereClause = and(eq(conversations.tenantId, userTenant.id));
+      if (status !== 'all') {
+        whereClause = and(whereClause, eq(conversations.status, status));
+      }
+      
+      const allConversations = await db.query.conversations.findMany({
+        where: whereClause,
+        orderBy: [desc(conversations.lastMessageAt)],
+        with: {
+          contact: true,
+          channel: true,
+          messages: {
+            limit: 1,
+            orderBy: [desc(messages.createdAt)]
+          }
+        }
+      });
+      
+      // If we don't have any actual conversations, return mock data for development
+      if (allConversations.length === 0) {
+        // Create mock data with proper shape for UI development
+        const mockConversations = [
+          {
+            id: 1,
+            tenantId: userTenant.id,
+            contactId: 1,
+            channelId: 1,
+            status: 'open',
+            assignedTo: null,
+            lastMessageAt: new Date(Date.now() - 5 * 60 * 1000),
+            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+            updatedAt: new Date(),
+            contact: {
+              id: 1,
+              firstName: 'John',
+              lastName: 'Smith',
+              email: 'john.smith@example.com',
+              phone: '+1234567890',
+              whatsapp: '+1234567890'
+            },
+            channel: {
+              id: 1,
+              code: 'WHATSAPP',
+              name: 'WhatsApp',
+            },
+            lastMessage: {
+              content: 'I need help with my order #12345'
+            }
+          },
+          {
+            id: 2,
+            tenantId: userTenant.id,
+            contactId: 2,
+            channelId: 1,
+            status: 'open',
+            assignedTo: null,
+            lastMessageAt: new Date(Date.now() - 12 * 60 * 1000),
+            createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+            updatedAt: new Date(),
+            contact: {
+              id: 2,
+              firstName: 'Sarah',
+              lastName: 'Johnson',
+              email: 'sarah.j@example.com',
+              phone: '+1987654321',
+              whatsapp: '+1987654321'
+            },
+            channel: {
+              id: 2,
+              code: 'SMS',
+              name: 'SMS',
+            },
+            lastMessage: {
+              content: 'When will my package arrive?'
+            }
+          },
+          {
+            id: 3,
+            tenantId: userTenant.id,
+            contactId: 3,
+            channelId: 1,
+            status: 'assigned',
+            assignedTo: 1,
+            lastMessageAt: new Date(Date.now() - 35 * 60 * 1000),
+            createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+            updatedAt: new Date(),
+            contact: {
+              id: 3,
+              firstName: 'Michael',
+              lastName: 'Brown',
+              email: 'michael.b@example.com',
+              phone: '+1122334455',
+              whatsapp: '+1122334455'
+            },
+            channel: {
+              id: 4,
+              code: 'RCS',
+              name: 'RCS',
+            },
+            lastMessage: {
+              content: "I'd like to change my subscription plan."
+            }
+          },
+          {
+            id: 4,
+            tenantId: userTenant.id,
+            contactId: 4,
+            channelId: 1,
+            status: 'closed',
+            assignedTo: 1,
+            lastMessageAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+            createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+            updatedAt: new Date(),
+            contact: {
+              id: 4,
+              firstName: 'Emma',
+              lastName: 'Davis',
+              email: 'emma.d@example.com',
+              phone: '+1555555555',
+              whatsapp: '+1555555555'
+            },
+            channel: {
+              id: 3,
+              code: 'VOIP',
+              name: 'VOIP',
+            },
+            lastMessage: {
+              content: 'Thank you for your help!'
+            }
+          }
+        ];
+        
+        return res.json(mockConversations);
+      }
+      
+      return res.json(allConversations);
+    } catch (error) {
+      console.error("Get conversations error:", error);
+      return res.status(500).json({ message: "Error fetching conversations" });
+    }
+  });
+  
+  // Get conversation messages
+  app.get(`${apiPrefix}/conversations/:id/messages`, async (req, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      if (isNaN(conversationId)) {
+        return res.status(400).json({ message: "Invalid conversation ID" });
+      }
+      
+      // This would normally fetch messages from the database
+      // For now, return mock data for development
+      const mockMessages = [
+        {
+          id: 1,
+          content: "Hello! I need help with my recent order #12345.",
+          direction: "inbound",
+          sentAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+        },
+        {
+          id: 2,
+          content: "Hi there! I'd be happy to help you with your order. Could you please provide more details about the issue you're experiencing?",
+          direction: "outbound",
+          sentAt: new Date(Date.now() - 28 * 60 * 1000).toISOString(),
+          sender: { name: "Alex Morgan" }
+        },
+        {
+          id: 3,
+          content: "I ordered a product last week, but it hasn't arrived yet. The tracking number doesn't show any updates for 3 days.",
+          direction: "inbound",
+          sentAt: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
+        },
+        {
+          id: 4,
+          content: "I understand your concern. Let me check the status of your order right away. This might take a few minutes.",
+          direction: "outbound",
+          sentAt: new Date(Date.now() - 22 * 60 * 1000).toISOString(),
+          sender: { name: "Alex Morgan" }
+        },
+        {
+          id: 5,
+          content: "Thank you, I'll wait.",
+          direction: "inbound",
+          sentAt: new Date(Date.now() - 20 * 60 * 1000).toISOString(),
+        }
+      ];
+      
+      return res.json(mockMessages);
+    } catch (error) {
+      console.error("Get conversation messages error:", error);
+      return res.status(500).json({ message: "Error fetching conversation messages" });
+    }
+  });
+  
+  // Send a message in a conversation
+  app.post(`${apiPrefix}/conversations/:id/messages`, async (req, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      if (isNaN(conversationId)) {
+        return res.status(400).json({ message: "Invalid conversation ID" });
+      }
+      
+      const { content } = req.body;
+      if (!content) {
+        return res.status(400).json({ message: "Message content is required" });
+      }
+      
+      // In a real implementation, we would save the message to the database
+      // and potentially send it through the appropriate channel
+      
+      // Mock response for development
+      const newMessage = {
+        id: Math.floor(Math.random() * 1000) + 100,
+        conversationId,
+        content,
+        direction: "outbound",
+        sentAt: new Date().toISOString(),
+        sender: { name: "Support Agent" }
+      };
+      
+      return res.status(201).json(newMessage);
+    } catch (error) {
+      console.error("Send message error:", error);
+      return res.status(500).json({ message: "Error sending message" });
+    }
+  });
+  
+  // Assign a conversation to a user
+  app.put(`${apiPrefix}/conversations/:id/assign`, async (req, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      if (isNaN(conversationId)) {
+        return res.status(400).json({ message: "Invalid conversation ID" });
+      }
+      
+      const { userId } = req.body;
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      
+      // In a real implementation, we would update the conversation in the database
+      
+      return res.status(200).json({ message: "Conversation assigned successfully" });
+    } catch (error) {
+      console.error("Assign conversation error:", error);
+      return res.status(500).json({ message: "Error assigning conversation" });
+    }
+  });
+  
+  // Close a conversation
+  app.put(`${apiPrefix}/conversations/:id/close`, async (req, res) => {
+    try {
+      const conversationId = parseInt(req.params.id);
+      if (isNaN(conversationId)) {
+        return res.status(400).json({ message: "Invalid conversation ID" });
+      }
+      
+      // In a real implementation, we would update the conversation in the database
+      
+      return res.status(200).json({ message: "Conversation closed successfully" });
+    } catch (error) {
+      console.error("Close conversation error:", error);
+      return res.status(500).json({ message: "Error closing conversation" });
+    }
+  });
+  
   app.get(`${apiPrefix}/conversations/queue`, async (req, res) => {
     try {
       // Get the tenant ID for the current user (or default user for development)
