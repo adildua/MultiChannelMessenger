@@ -9,6 +9,12 @@ import { createInsertSchema } from "drizzle-zod";
 import Stripe from "stripe";
 import * as crypto from "crypto";
 import { aiService } from "./ai-service";
+import multer from "multer";
+import csv from "csv-parser";
+import * as xlsx from "xlsx";
+import * as fs from "fs";
+import path from "path";
+import { createObjectCsvWriter } from "csv-writer";
 
 // Helper function to safely get the user ID from the session or use a default
 // This is only for development until proper authentication is implemented
@@ -1445,6 +1451,188 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ 
         message: "Error optimizing message",
         error: error.message
+      });
+    }
+  });
+
+  // Setup multer for file uploads
+  const upload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+  });
+
+  // File upload route for contacts
+  app.post(`${apiPrefix}/contacts/upload`, upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Get the tenant ID for the current user
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
+      if (!userTenant) {
+        return res.status(404).json({ message: "No tenant found for user" });
+      }
+
+      const fileBuffer = req.file.buffer;
+      const filename = req.file.originalname.toLowerCase();
+      
+      // Process based on file type
+      let contacts = [];
+      let errors = [];
+      
+      if (filename.endsWith('.csv')) {
+        // Parse CSV
+        const rows = [];
+        
+        // Convert buffer to string and process line by line
+        const csvString = fileBuffer.toString('utf8');
+        const lines = csvString.split('\n');
+        
+        if (lines.length < 2) {
+          return res.status(400).json({ message: "CSV file is empty or has no data rows" });
+        }
+        
+        // Parse header row
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+        
+        // Check for required headers
+        const firstNameIdx = headers.findIndex(h => h === 'first name' || h === 'firstname');
+        if (firstNameIdx === -1) {
+          return res.status(400).json({ message: "CSV must include a 'First Name' column" });
+        }
+        
+        // Map other headers
+        const lastNameIdx = headers.findIndex(h => h === 'last name' || h === 'lastname');
+        const emailIdx = headers.findIndex(h => h === 'email');
+        const phoneIdx = headers.findIndex(h => h === 'phone');
+        const whatsappIdx = headers.findIndex(h => h === 'whatsapp');
+        const statusIdx = headers.findIndex(h => h === 'status');
+        
+        // Process data rows
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue; // Skip empty lines
+          
+          const values = line.split(',').map(v => v.trim());
+          
+          if (!values[firstNameIdx]) {
+            errors.push(`Line ${i+1}: First Name is required`);
+            continue;
+          }
+          
+          try {
+            const contact = {
+              tenantId: userTenant.id,
+              firstName: values[firstNameIdx] || '',
+              lastName: lastNameIdx >= 0 ? values[lastNameIdx] || null : null,
+              email: emailIdx >= 0 ? values[emailIdx] || null : null,
+              phone: phoneIdx >= 0 ? values[phoneIdx] || null : null,
+              whatsapp: whatsappIdx >= 0 ? values[whatsappIdx] || null : null,
+              isActive: statusIdx >= 0 ? values[statusIdx]?.toLowerCase() === 'active' : true
+            };
+            
+            // Validate contact
+            const validContact = await storage.validateContactData(contact);
+            contacts.push(validContact);
+          } catch (error) {
+            errors.push(`Line ${i+1}: ${error instanceof Error ? error.message : String(error)}`);
+          }
+        }
+      } else if (filename.endsWith('.xlsx') || filename.endsWith('.xls')) {
+        // Parse Excel file
+        try {
+          const workbook = xlsx.read(fileBuffer);
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          
+          // Convert to JSON
+          const jsonData = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
+          
+          if (jsonData.length < 2) {
+            return res.status(400).json({ message: "Excel file is empty or has no data rows" });
+          }
+          
+          // Get headers (first row)
+          const headers = jsonData[0].map((h: any) => String(h).trim().toLowerCase());
+          
+          // Check for required headers
+          const firstNameIdx = headers.findIndex((h: string) => h === 'first name' || h === 'firstname');
+          if (firstNameIdx === -1) {
+            return res.status(400).json({ message: "Excel file must include a 'First Name' column" });
+          }
+          
+          // Map other headers
+          const lastNameIdx = headers.findIndex((h: string) => h === 'last name' || h === 'lastname');
+          const emailIdx = headers.findIndex((h: string) => h === 'email');
+          const phoneIdx = headers.findIndex((h: string) => h === 'phone');
+          const whatsappIdx = headers.findIndex((h: string) => h === 'whatsapp');
+          const statusIdx = headers.findIndex((h: string) => h === 'status');
+          
+          // Process data rows
+          for (let i = 1; i < jsonData.length; i++) {
+            const row = jsonData[i];
+            
+            if (!row || !row[firstNameIdx]) {
+              if (row && row.length > 0) {
+                errors.push(`Row ${i+1}: First Name is required`);
+              }
+              continue; // Skip empty rows
+            }
+            
+            try {
+              const contact = {
+                tenantId: userTenant.id,
+                firstName: row[firstNameIdx] ? String(row[firstNameIdx]).trim() : '',
+                lastName: lastNameIdx >= 0 && row[lastNameIdx] ? String(row[lastNameIdx]).trim() : null,
+                email: emailIdx >= 0 && row[emailIdx] ? String(row[emailIdx]).trim() : null,
+                phone: phoneIdx >= 0 && row[phoneIdx] ? String(row[phoneIdx]).trim() : null,
+                whatsapp: whatsappIdx >= 0 && row[whatsappIdx] ? String(row[whatsappIdx]).trim() : null,
+                isActive: statusIdx >= 0 && row[statusIdx] ? String(row[statusIdx]).toLowerCase() === 'active' : true
+              };
+              
+              // Validate contact
+              const validContact = await storage.validateContactData(contact);
+              contacts.push(validContact);
+            } catch (error) {
+              errors.push(`Row ${i+1}: ${error instanceof Error ? error.message : String(error)}`);
+            }
+          }
+        } catch (error) {
+          return res.status(400).json({ 
+            message: "Failed to parse Excel file", 
+            error: error instanceof Error ? error.message : String(error)
+          });
+        }
+      } else {
+        return res.status(400).json({ 
+          message: "Unsupported file format. Please upload a CSV or Excel file."
+        });
+      }
+      
+      // Insert validated contacts
+      let inserted = 0;
+      for (const contact of contacts) {
+        try {
+          await storage.insertContact(contact);
+          inserted++;
+        } catch (error) {
+          errors.push(`Error inserting contact ${contact.firstName}: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }
+      
+      return res.status(200).json({
+        success: true,
+        imported: inserted,
+        total: contacts.length,
+        errors: errors.length > 0 ? errors : null
+      });
+    } catch (error) {
+      console.error("Contact upload error:", error);
+      return res.status(500).json({ 
+        message: "Error processing file upload",
+        error: error instanceof Error ? error.message : String(error)
       });
     }
   });
