@@ -164,9 +164,9 @@ export default function Campaigns() {
       campaign.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (campaign.description && campaign.description.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    const matchesStatus = statusFilter === "" || campaign.status === statusFilter;
+    const matchesStatus = statusFilter === "all" || statusFilter === "" || campaign.status === statusFilter;
     
-    const matchesChannel = channelFilter === "" || campaign.channelId.toString() === channelFilter;
+    const matchesChannel = channelFilter === "all" || channelFilter === "" || campaign.channelId.toString() === channelFilter;
     
     return matchesSearch && matchesStatus && matchesChannel;
   });
@@ -213,7 +213,7 @@ export default function Campaigns() {
                         </div>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Statuses</SelectItem>
+                        <SelectItem value="all">All Statuses</SelectItem>
                         <SelectItem value="draft">Draft</SelectItem>
                         <SelectItem value="scheduled">Scheduled</SelectItem>
                         <SelectItem value="active">Active</SelectItem>
@@ -231,7 +231,7 @@ export default function Campaigns() {
                         </div>
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Channels</SelectItem>
+                        <SelectItem value="all">All Channels</SelectItem>
                         {channels?.map(channel => (
                           <SelectItem key={channel.id} value={channel.id.toString()}>
                             {channel.name}
