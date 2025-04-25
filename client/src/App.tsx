@@ -46,6 +46,11 @@ function Router() {
           <Templates />
         </AppLayout>
       </Route>
+      <Route path="/whatsapp-templates">
+        <AppLayout>
+          <WhatsAppTemplates />
+        </AppLayout>
+      </Route>
       <Route path="/conversations">
         <AppLayout>
           <Conversations />

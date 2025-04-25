@@ -71,13 +71,21 @@ export function WhatsAppTemplateSimulator({
 
   const getVariablesFromBody = () => {
     const regex = /{{([0-9]+)}}/g;
-    const matches = [...template.body.matchAll(regex)];
-    return [...new Set(matches.map((match) => match[1]))];
+    let matches: RegExpExecArray | null;
+    const results: string[] = [];
+    
+    while ((matches = regex.exec(template.body)) !== null) {
+      if (matches[1] && !results.includes(matches[1])) {
+        results.push(matches[1]);
+      }
+    }
+    
+    return results;
   };
   
   const replaceVariablesInText = (text: string) => {
     return text.replace(/{{([0-9]+)}}/g, (match, number) => {
-      return template.variables[number] || match;
+      return template.variables[number as keyof typeof template.variables] || match;
     });
   };
 
@@ -213,7 +221,7 @@ export function WhatsAppTemplateSimulator({
                 className="mt-1 min-h-[120px]"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Use {{number}} to add variables. Example: Hi {{1}}, your order #{{2}} has been shipped.
+                Use {`{{number}}`} to add variables. Example: Hi {`{{1}}`}, your order #{`{{2}}`} has been shipped.
               </p>
             </div>
             
@@ -258,7 +266,7 @@ export function WhatsAppTemplateSimulator({
                 <div className="text-center p-4 border border-dashed rounded-md">
                   <p className="text-gray-500">No variables found in your template.</p>
                   <p className="text-gray-500 text-sm mt-1">
-                    Add variables using {{"{{"}}number{{"}}"}} format in the body text.
+                    Add variables using {`{{number}}`} format in the body text.
                   </p>
                 </div>
               )}
