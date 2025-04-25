@@ -80,6 +80,7 @@ const securityFormSchema = z.object({
 export default function Settings() {
   const [activeTab, setActiveTab] = useState("profile");
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
 
   // Profile form
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
@@ -108,7 +109,7 @@ export default function Settings() {
   const appearanceForm = useForm<z.infer<typeof appearanceFormSchema>>({
     resolver: zodResolver(appearanceFormSchema),
     defaultValues: {
-      theme: "light",
+      theme: theme || "light",
       language: "en",
       timezone: "UTC",
     },
@@ -168,15 +169,9 @@ export default function Settings() {
       // This would be sent to the API in a real application
       // await apiRequest('PUT', '/api/user/appearance', data);
       
-      // Update theme if using ThemeProvider
-      if (data.theme && window) {
-        const themeProviderElement = document.documentElement;
-        themeProviderElement.classList.remove("light", "dark");
-        themeProviderElement.classList.add(data.theme === "system" 
-          ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
-          : data.theme
-        );
-        localStorage.setItem("ui-theme", data.theme);
+      // Update theme using ThemeProvider
+      if (data.theme) {
+        setTheme(data.theme);
       }
       
       toast({
@@ -222,7 +217,7 @@ export default function Settings() {
   return (
     <div className="py-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-        <h1 className="text-2xl font-semibold text-gray-900">Settings</h1>
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Settings</h1>
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
         <div className="py-4">
