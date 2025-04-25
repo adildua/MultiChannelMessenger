@@ -155,10 +155,14 @@ export default function Templates() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">Templates</h1>
-            <div className="flex mt-2 space-x-2">
+            <div className="flex mt-2 space-x-4">
               <a href="/whatsapp-templates" className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center">
                 <MessageCircle className="h-4 w-4 mr-1" />
                 WhatsApp Templates
+              </a>
+              <a href="/sms-templates" className="text-sm text-blue-600 hover:text-blue-800 flex items-center">
+                <MessageSquare className="h-4 w-4 mr-1" />
+                SMS Templates
               </a>
             </div>
           </div>

@@ -9,6 +9,7 @@ import Contacts from "@/pages/contacts";
 import FlowBuilder from "@/pages/flow-builder";
 import Templates from "@/pages/templates";
 import WhatsAppTemplates from "@/pages/whatsapp-templates";
+import SmsTemplates from "@/pages/sms-templates";
 import Conversations from "@/pages/conversations";
 import ApiIntegrations from "@/pages/api-integrations";
 import TenantManagement from "@/pages/tenant-management";
@@ -50,6 +51,11 @@ function Router() {
       <Route path="/whatsapp-templates">
         <AppLayout>
           <WhatsAppTemplates />
+        </AppLayout>
+      </Route>
+      <Route path="/sms-templates">
+        <AppLayout>
+          <SmsTemplates />
         </AppLayout>
       </Route>
       <Route path="/conversations">
