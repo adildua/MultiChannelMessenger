@@ -1060,6 +1060,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Message content is required" });
       }
       
+      // Get the user ID
+      const userId = getUserId(req);
+      
+      console.log(`Received message from user ${userId} for conversation ${conversationId}: ${content}`);
+      
       // In a real implementation, we would save the message to the database
       // and potentially send it through the appropriate channel
       
@@ -1072,6 +1077,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sentAt: new Date().toISOString(),
         sender: { name: "Support Agent" }
       };
+      
+      // Add a short delay to simulate network latency
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       return res.status(201).json(newMessage);
     } catch (error) {

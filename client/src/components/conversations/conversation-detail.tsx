@@ -88,23 +88,37 @@ export function ConversationDetail({ conversation, onBack }: ConversationDetailP
         sender: { name: 'You' } // Placeholder name
       };
 
-      // Update the local messages state with the optimistic message
-      queryClient.setQueryData<Message[]>(
-        [`/api/conversations/${conversation.id}/messages`],
-        (oldMessages) => [...(oldMessages || []), optimisticMessage]
-      );
-
-      // Clear the input immediately for better UX
+      // Save the current message for potential error recovery
       const messageToSend = messageInput;
+      
+      // Clear the input immediately for better UX
       setMessageInput("");
 
-      // Actually send the message
+      // Update the local messages state with the optimistic message
+      // Do this after clearing the input to ensure UI is updated
+      const currentMessages = queryClient.getQueryData<Message[]>([`/api/conversations/${conversation.id}/messages`]) || [];
+      const updatedMessages = [...currentMessages, optimisticMessage];
+      
+      // Set the updated messages directly
+      queryClient.setQueryData<Message[]>(
+        [`/api/conversations/${conversation.id}/messages`],
+        updatedMessages
+      );
+
+      // Log for debugging
+      console.log("Message sent:", messageToSend);
+      console.log("Updated messages:", updatedMessages);
+
+      // Actually send the message to the server
       await apiRequest('POST', `/api/conversations/${conversation.id}/messages`, { 
         content: messageToSend 
       });
       
       // Invalidate messages query to get the server's response with correct IDs
-      queryClient.invalidateQueries({ queryKey: [`/api/conversations/${conversation.id}/messages`] });
+      // Use a slight delay to ensure the optimistic update persists long enough to be visible
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: [`/api/conversations/${conversation.id}/messages`] });
+      }, 500);
     } catch (error) {
       // Restore the message input if there's an error
       setMessageInput(messageInput);
