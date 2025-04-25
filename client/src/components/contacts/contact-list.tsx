@@ -115,12 +115,17 @@ export function ContactList() {
     setImportProgress(10);
 
     try {
-      // Read the file
-      const fileContent = await importFile.text();
+      // Create FormData with the file
+      const formData = new FormData();
+      formData.append('file', importFile);
       setImportProgress(30);
 
-      // Send to API
-      const response = await apiRequest('POST', '/api/contacts/import', { data: fileContent });
+      // Send to API using the correct endpoint
+      // We need to use fetch directly instead of apiRequest because we're sending FormData
+      const response = await fetch('/api/contacts/upload', {
+        method: 'POST',
+        body: formData,
+      });
       setImportProgress(90);
       
       const result = await response.json();
