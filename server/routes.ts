@@ -131,6 +131,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Error fetching contacts" });
     }
   });
+  
+  app.get(`${apiPrefix}/contacts/stats`, async (req, res) => {
+    try {
+      // Get the tenant ID for the current user
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
+      if (!userTenant) {
+        return res.status(404).json({ message: "No tenant found for user" });
+      }
+      
+      const stats = await storage.getContactStats(userTenant.id);
+      
+      return res.json(stats);
+    } catch (error) {
+      console.error("Get contact stats error:", error);
+      return res.status(500).json({ message: "Error fetching contact stats" });
+    }
+  });
 
   app.post(`${apiPrefix}/contacts`, async (req, res) => {
     try {
@@ -270,24 +288,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Delete contact error:", error);
       return res.status(500).json({ message: "Error deleting contact" });
-    }
-  });
-  
-  app.get(`${apiPrefix}/contacts/stats`, async (req, res) => {
-    try {
-      // Get the tenant ID for the current user
-      const userId = getUserId(req);
-      const userTenant = await storage.getUserPrimaryTenant(userId);
-      if (!userTenant) {
-        return res.status(404).json({ message: "No tenant found for user" });
-      }
-      
-      const stats = await storage.getContactStats(userTenant.id);
-      
-      return res.json(stats);
-    } catch (error) {
-      console.error("Get contact stats error:", error);
-      return res.status(500).json({ message: "Error fetching contact stats" });
     }
   });
 
