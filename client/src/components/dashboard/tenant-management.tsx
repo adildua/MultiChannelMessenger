@@ -109,12 +109,17 @@ export function TenantManagement({ onAddTenant }: TenantManagementProps) {
                       Level {tenant.level}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tenant.contacts.toLocaleString()}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {tenant.contacts ? tenant.contacts.toLocaleString() : 'N/A'}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {new Intl.NumberFormat('en-US', { 
-                      style: 'currency', 
-                      currency: tenant.currency || 'USD' 
-                    }).format(tenant.balance)}
+                    {typeof tenant.balance === 'number' 
+                      ? new Intl.NumberFormat('en-US', { 
+                          style: 'currency', 
+                          currency: tenant.currencyCode || 'USD' 
+                        }).format(tenant.balance)
+                      : 'N/A'
+                    }
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(tenant.isActive)}`}>

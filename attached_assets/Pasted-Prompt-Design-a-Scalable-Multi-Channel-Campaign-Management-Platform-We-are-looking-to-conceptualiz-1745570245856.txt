@@ -1,0 +1,78 @@
+Prompt: Design a Scalable Multi-Channel Campaign Management Platform
+
+We are looking to conceptualize and implement a robust, enterprise-grade Multi-Channel Campaign Management System designed to streamline communication across SMS, VOIP, WhatsApp, and RCS. The system should support real-time, automated, and two-way interactions with rich personalization and analytics capabilities. The solution must be modular, multi-tenant, API-first, and secure.
+
+🔧 Core Functional Modules
+
+1. Unified Contact Management
+
+Centralized contact repository shared across all communication channels
+
+Advanced segmentation, tagging, and custom attribute management
+
+Bulk import/export with CSV and API support
+
+Maintain full communication history across all channels for each contact
+
+2. Visual Campaign Flow Builder
+
+Drag-and-drop interface to build omni-channel journeys
+
+Conditional logic, branching, and user-response-driven paths
+
+Event-triggered and scheduled workflows
+
+A/B testing and performance comparison of branches
+
+Visual debugging and simulation mode for testing flows
+
+3. Template Management System
+
+Channel-specific template creation and editing (SMS, VOIP, WhatsApp, RCS)
+
+Rich media support (images, videos, files) where applicable
+
+Version control, approval workflows, and audit trails
+
+Performance analytics by channel, campaign, and variation
+
+Dynamic fields and personalization using variables and data tags
+
+Canvas Template Creation Simulator to preview, test, and validate templates visually across channels
+
+4. Two-Way Communication & Intelligent Routing Hub
+
+Centralized queuing and handling of inbound messages
+
+Smart routing based on intent, channel, priority, or custom rules
+
+Failover routing and retry logic
+
+Channel-specific and unified API integrations
+
+Real-time dashboards for monitoring message status and conversations
+
+5. Multi-Tenant and Role-Based Architecture
+
+Hierarchical structure: Super Admin > Organization > Sub-Organization
+
+Role-based access control and permissions management
+
+Full white-labeling per tenant (logos, colors, URLs, domains)
+
+Isolated data environments and customizable branding
+
+6. Billing, Wallet & Currency Management
+
+Unified wallet system usable across channels
+
+Multi-currency support with real-time exchange rates
+
+Flexible pricing models per channel, tenant, or campaign
+
+Automated invoicing, taxation rules, and transaction logs
+
+Credit limit management, alerts, and balance tracking
+
+Comprehensive usage and billing reports
+
