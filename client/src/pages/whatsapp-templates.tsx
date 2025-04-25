@@ -140,8 +140,14 @@ export default function WhatsAppTemplates() {
         category: templateData.category,
         language: templateData.language,
         headerType: templateData.headerType,
+        headerContent: templateData.headerContent || '',
+        headerImage: templateData.headerImage,
+        headerVideo: templateData.headerVideo,
+        headerDocument: templateData.headerDocument,
         footer: templateData.footer,
-        variables: templateData.variables
+        variables: templateData.variables,
+        includeButtons: templateData.includeButtons || false,
+        buttons: templateData.buttons || []
       },
       isActive: true
     };
@@ -276,8 +282,11 @@ export default function WhatsAppTemplates() {
               category: selectedTemplate.metadata?.category || "marketing",
               language: selectedTemplate.metadata?.language || "english",
               headerType: selectedTemplate.metadata?.headerType || "none",
+              headerContent: selectedTemplate.metadata?.headerContent || "",
               body: selectedTemplate.content,
-              footer: selectedTemplate.metadata?.footer || ""
+              footer: selectedTemplate.metadata?.footer || "",
+              includeButtons: selectedTemplate.metadata?.includeButtons || false,
+              buttons: selectedTemplate.metadata?.buttons || []
             } : undefined}
             onSave={handleSaveTemplate}
             onClose={() => setShowSimulator(false)}
