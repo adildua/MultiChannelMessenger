@@ -131,8 +131,94 @@ export const templates = pgTable("templates", {
   content: text("content").notNull(),
   variables: jsonb("variables"),
   previewData: jsonb("preview_data"),
-  metadata: jsonb("metadata"), // For WhatsApp template specific data (category, language, headerType, footer)
+  metadata: jsonb("metadata"), // For channel-specific data (category, language, headerType, footer, etc.)
+  folderId: integer("folder_id").references(() => templateFolders.id),
+  status: text("status").notNull().default("draft"), // draft, pending_approval, approved, rejected
+  currentVersionId: integer("current_version_id"),
   isActive: boolean("is_active").notNull().default(true),
+  createdById: integer("created_by_id").references(() => users.id),
+  lastModifiedById: integer("last_modified_by_id").references(() => users.id),
+  tags: text("tags").array(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+// Template Versions
+export const templateVersions = pgTable("template_versions", {
+  id: serial("id").primaryKey(),
+  templateId: integer("template_id").references(() => templates.id).notNull(),
+  versionNumber: integer("version_number").notNull(),
+  content: text("content").notNull(),
+  variables: jsonb("variables"),
+  previewData: jsonb("preview_data"),
+  metadata: jsonb("metadata"),
+  createdById: integer("created_by_id").references(() => users.id),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+// Template Approvals
+export const templateApprovals = pgTable("template_approvals", {
+  id: serial("id").primaryKey(),
+  templateId: integer("template_id").references(() => templates.id).notNull(),
+  versionId: integer("version_id").references(() => templateVersions.id).notNull(),
+  requestedById: integer("requested_by_id").references(() => users.id).notNull(),
+  reviewedById: integer("reviewed_by_id").references(() => users.id),
+  status: text("status").notNull().default("pending"), // pending, approved, rejected
+  comments: text("comments"),
+  requestedAt: timestamp("requested_at").defaultNow().notNull(),
+  reviewedAt: timestamp("reviewed_at")
+});
+
+// Template Folders
+export const templateFolders = pgTable("template_folders", {
+  id: serial("id").primaryKey(),
+  tenantId: integer("tenant_id").references(() => tenants.id).notNull(),
+  name: text("name").notNull(),
+  parentId: integer("parent_id"), // Will be referenced after declaration
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+// Template Media Assets
+export const templateMedia = pgTable("template_media", {
+  id: serial("id").primaryKey(),
+  templateId: integer("template_id").references(() => templates.id).notNull(),
+  type: text("type").notNull(), // image, video, document, audio
+  fileName: text("file_name").notNull(),
+  fileSize: integer("file_size").notNull(),
+  mimeType: text("mime_type").notNull(),
+  url: text("url").notNull(),
+  thumbnailUrl: text("thumbnail_url"),
+  metadata: jsonb("metadata"),
+  createdById: integer("created_by_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+// Template Audit Logs
+export const templateAuditLogs = pgTable("template_audit_logs", {
+  id: serial("id").primaryKey(),
+  templateId: integer("template_id").references(() => templates.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  action: text("action").notNull(), // created, edited, status_changed, approved, rejected, published, etc.
+  details: jsonb("details"),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+// Template Analytics
+export const templateAnalytics = pgTable("template_analytics", {
+  id: serial("id").primaryKey(),
+  templateId: integer("template_id").references(() => templates.id).notNull(),
+  campaignId: integer("campaign_id").references(() => campaigns.id),
+  sentCount: integer("sent_count").notNull().default(0),
+  deliveredCount: integer("delivered_count").notNull().default(0),
+  openCount: integer("open_count").notNull().default(0),
+  clickCount: integer("click_count").notNull().default(0),
+  responseCount: integer("response_count").notNull().default(0),
+  bounceCount: integer("bounce_count").notNull().default(0),
+  period: text("period").notNull(), // daily, weekly, monthly, all_time
+  statsDate: timestamp("stats_date"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
@@ -314,7 +400,51 @@ export const apiIntegrationsRelations = relations(apiIntegrations, ({ one }) => 
 
 export const templatesRelations = relations(templates, ({ one, many }) => ({
   tenant: one(tenants, { fields: [templates.tenantId], references: [tenants.id] }),
+  folder: one(templateFolders, { fields: [templates.folderId], references: [templateFolders.id] }),
+  currentVersion: one(templateVersions, { fields: [templates.currentVersionId], references: [templateVersions.id] }),
+  createdBy: one(users, { fields: [templates.createdById], references: [users.id] }),
+  lastModifiedBy: one(users, { fields: [templates.lastModifiedById], references: [users.id] }),
+  versions: many(templateVersions),
+  approvals: many(templateApprovals),
+  media: many(templateMedia),
+  auditLogs: many(templateAuditLogs),
+  analytics: many(templateAnalytics),
   campaigns: many(campaigns)
+}));
+
+export const templateVersionsRelations = relations(templateVersions, ({ one, many }) => ({
+  template: one(templates, { fields: [templateVersions.templateId], references: [templates.id] }),
+  createdBy: one(users, { fields: [templateVersions.createdById], references: [users.id] }),
+  approvals: many(templateApprovals)
+}));
+
+export const templateApprovalsRelations = relations(templateApprovals, ({ one }) => ({
+  template: one(templates, { fields: [templateApprovals.templateId], references: [templates.id] }),
+  version: one(templateVersions, { fields: [templateApprovals.versionId], references: [templateVersions.id] }),
+  requestedBy: one(users, { fields: [templateApprovals.requestedById], references: [users.id] }),
+  reviewedBy: one(users, { fields: [templateApprovals.reviewedById], references: [users.id] })
+}));
+
+export const templateFoldersRelations = relations(templateFolders, ({ one, many }) => ({
+  tenant: one(tenants, { fields: [templateFolders.tenantId], references: [tenants.id] }),
+  parent: one(templateFolders, { fields: [templateFolders.parentId], references: [templateFolders.id] }),
+  children: many(templateFolders, { relationName: 'subfolders' }),
+  templates: many(templates)
+}));
+
+export const templateMediaRelations = relations(templateMedia, ({ one }) => ({
+  template: one(templates, { fields: [templateMedia.templateId], references: [templates.id] }),
+  createdBy: one(users, { fields: [templateMedia.createdById], references: [users.id] })
+}));
+
+export const templateAuditLogsRelations = relations(templateAuditLogs, ({ one }) => ({
+  template: one(templates, { fields: [templateAuditLogs.templateId], references: [templates.id] }),
+  user: one(users, { fields: [templateAuditLogs.userId], references: [users.id] })
+}));
+
+export const templateAnalyticsRelations = relations(templateAnalytics, ({ one }) => ({
+  template: one(templates, { fields: [templateAnalytics.templateId], references: [templates.id] }),
+  campaign: one(campaigns, { fields: [templateAnalytics.campaignId], references: [campaigns.id] })
 }));
 
 export const flowsRelations = relations(flows, ({ one, many }) => ({
