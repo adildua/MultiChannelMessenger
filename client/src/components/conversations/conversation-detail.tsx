@@ -79,15 +79,35 @@ export function ConversationDetail({ conversation, onBack }: ConversationDetailP
     if (!messageInput.trim()) return;
 
     try {
+      // Get the current timestamp for immediate display
+      const optimisticMessage: Message = {
+        id: -Date.now(), // Temporary negative ID to avoid collisions
+        content: messageInput,
+        direction: 'outbound',
+        sentAt: new Date().toISOString(),
+        sender: { name: 'You' } // Placeholder name
+      };
+
+      // Update the local messages state with the optimistic message
+      queryClient.setQueryData<Message[]>(
+        [`/api/conversations/${conversation.id}/messages`],
+        (oldMessages) => [...(oldMessages || []), optimisticMessage]
+      );
+
+      // Clear the input immediately for better UX
+      const messageToSend = messageInput;
+      setMessageInput("");
+
+      // Actually send the message
       await apiRequest('POST', `/api/conversations/${conversation.id}/messages`, { 
-        content: messageInput 
+        content: messageToSend 
       });
       
-      // Invalidate messages query to refresh
+      // Invalidate messages query to get the server's response with correct IDs
       queryClient.invalidateQueries({ queryKey: [`/api/conversations/${conversation.id}/messages`] });
-      
-      setMessageInput("");
     } catch (error) {
+      // Restore the message input if there's an error
+      setMessageInput(messageInput);
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",
