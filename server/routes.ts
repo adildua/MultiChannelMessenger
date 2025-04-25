@@ -164,10 +164,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get(`${apiPrefix}/contacts/:id`, async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
     try {
       const contactId = parseInt(req.params.id);
       if (isNaN(contactId)) {
@@ -175,7 +171,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Get the tenant ID for the current user
-      const userTenant = await storage.getUserPrimaryTenant(req.session.userId);
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
       if (!userTenant) {
         return res.status(404).json({ message: "No tenant found for user" });
       }
@@ -199,10 +196,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.put(`${apiPrefix}/contacts/:id`, async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
     try {
       const contactId = parseInt(req.params.id);
       if (isNaN(contactId)) {
@@ -213,7 +206,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const contactData = await storage.validateContactData(req.body);
       
       // Get the tenant ID for the current user
-      const userTenant = await storage.getUserPrimaryTenant(req.session.userId);
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
       if (!userTenant) {
         return res.status(404).json({ message: "No tenant found for user" });
       }
@@ -244,10 +238,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.delete(`${apiPrefix}/contacts/:id`, async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
     try {
       const contactId = parseInt(req.params.id);
       if (isNaN(contactId)) {
@@ -255,7 +245,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Get the tenant ID for the current user
-      const userTenant = await storage.getUserPrimaryTenant(req.session.userId);
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
       if (!userTenant) {
         return res.status(404).json({ message: "No tenant found for user" });
       }
@@ -283,13 +274,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   app.get(`${apiPrefix}/contacts/stats`, async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
     try {
       // Get the tenant ID for the current user
-      const userTenant = await storage.getUserPrimaryTenant(req.session.userId);
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
       if (!userTenant) {
         return res.status(404).json({ message: "No tenant found for user" });
       }
@@ -305,13 +293,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Contact List routes
   app.get(`${apiPrefix}/contact-lists`, async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
     try {
       // Get the tenant ID for the current user
-      const userTenant = await storage.getUserPrimaryTenant(req.session.userId);
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
       if (!userTenant) {
         return res.status(404).json({ message: "No tenant found for user" });
       }
@@ -382,10 +367,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get(`${apiPrefix}/templates/:id`, async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
     try {
       const templateId = parseInt(req.params.id);
       if (isNaN(templateId)) {
@@ -393,7 +374,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Get the tenant ID for the current user
-      const userTenant = await storage.getUserPrimaryTenant(req.session.userId);
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
       if (!userTenant) {
         return res.status(404).json({ message: "No tenant found for user" });
       }
@@ -417,10 +399,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.put(`${apiPrefix}/templates/:id`, async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
     try {
       const templateId = parseInt(req.params.id);
       if (isNaN(templateId)) {
@@ -431,7 +409,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const templateData = await storage.validateTemplateData(req.body);
       
       // Get the tenant ID for the current user
-      const userTenant = await storage.getUserPrimaryTenant(req.session.userId);
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
       if (!userTenant) {
         return res.status(404).json({ message: "No tenant found for user" });
       }
@@ -462,10 +441,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.delete(`${apiPrefix}/templates/:id`, async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
     try {
       const templateId = parseInt(req.params.id);
       if (isNaN(templateId)) {
@@ -473,7 +448,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Get the tenant ID for the current user
-      const userTenant = await storage.getUserPrimaryTenant(req.session.userId);
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
       if (!userTenant) {
         return res.status(404).json({ message: "No tenant found for user" });
       }
@@ -502,13 +478,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Flow routes
   app.get(`${apiPrefix}/flows`, async (req, res) => {
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
     try {
       // Get the tenant ID for the current user
-      const userTenant = await storage.getUserPrimaryTenant(req.session.userId);
+      const userId = getUserId(req);
+      const userTenant = await storage.getUserPrimaryTenant(userId);
       if (!userTenant) {
         return res.status(404).json({ message: "No tenant found for user" });
       }

@@ -118,7 +118,7 @@ async function seed() {
 
       // Create some child tenants
       const level2 = await db.query.tenantLevels.findFirst({
-        where: schema.eq(schema.tenantLevels.name, "Business")
+        where: eq(schema.tenantLevels.name, "Business")
       });
 
       if (!level2) {
@@ -138,7 +138,7 @@ async function seed() {
       });
 
       const level3 = await db.query.tenantLevels.findFirst({
-        where: schema.eq(schema.tenantLevels.name, "Starter")
+        where: eq(schema.tenantLevels.name, "Starter")
       });
 
       if (!level3) {
@@ -229,7 +229,7 @@ async function seed() {
 
       // Add contacts to list
       const contacts = await db.query.contacts.findMany({
-        where: schema.eq(schema.contacts.tenantId, mainTenant.id)
+        where: eq(schema.contacts.tenantId, mainTenant.id)
       });
 
       const contactListMembers = contacts.map(contact => ({
@@ -313,7 +313,7 @@ async function seed() {
 
       // Create sample campaigns
       const smsChannel = await db.query.channels.findFirst({
-        where: schema.eq(schema.channels.code, "SMS")
+        where: eq(schema.channels.code, "SMS")
       });
 
       if (!smsChannel) {
@@ -321,7 +321,7 @@ async function seed() {
       }
 
       const template = await db.query.templates.findFirst({
-        where: schema.eq(schema.templates.type, "sms")
+        where: eq(schema.templates.type, "sms")
       });
 
       await db.insert(schema.campaigns).values([
